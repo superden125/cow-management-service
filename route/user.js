@@ -1,42 +1,61 @@
 const express = require('express')
 const UserController = require('../controller/user')
 
-module.exports = (app) =>{
-    const router = express.Router()    
 
-    router.route('/:id')
-        .get(async (req,res)=>{
-            let id = req.params.id
-            let user = await UserController.read(id)
-            console.log("user", user)
-            if(!user) return res.json({success: false, msg: "user not found"})            
-            res.json({success: true, data: user})
-        })
-        .put(async (req,res)=>{
-            let id = req.params.id
-            let data = req.body
-            let user = await UserController.update(id,data)
-            if(!user) return res.json({success: false, msg: "something wrong"})
-            res.json({success: true, data: user})
-        })
-        .delete(async (req,res)=>{
-            let id = req.params.id
-            let user = await UserController.delete(id)
-            if(!user) return res.json({success: false, msg: "user not found"})
-            res.json({success: true})
-        })
+const router = express.Router()    
 
-    router.route('/')
-        .get(async (req,res)=>{
-            let users = await UserController.queryByFields({})
-            res.json(users)
-        })
-        .post(async (req,res)=>{
-            let data = req.body                                    
-            let result = await UserController.create(data)            
-            res.json(result)
+router.route('/:id')
+    .get(async (req,res)=>{
+        let id = req.params.id
+        let user = await UserController.findById(id)        
+        if(!user) return res.json({status: false, msg: "user not found"})            
+        res.json({status: true, data: user})
+    })
+    .put(async (req,res)=>{
+        let id = req.params.id
+        let data = req.body
+        let user = await UserController.updateOne(id,data)
+        if(user.err) return res.json({status: false, msg: "something wrong"})
+        res.json({status: true})
+    })
+    .delete(async (req,res)=>{
+        let id = req.params.id
+        let user = await UserController.deleteById(id)
+        if(!user) return res.json({status: false, msg: "user not found"})
+        res.json({status: true})
+    })
 
-        })
+router.route('/')
+    .get(async (req,res)=>{
+        try {
+            let query = req.query
+            query.limit = query.limit ? query.limit : query.take
+            delete query.take        
+            let users = await UserController.getMany(query)
+            res.json({status: true, data: users})
+        } catch (error) {
+            return res.json({status: false, data:[], message: "Error query data"})
+        }
+    })
+    .post(async (req,res)=>{
+        let data = req.body                                    
+        let result = await UserController.insertOne(data)
+        if(result.err) return res.json({status: false})        
+        return res.json({status: true, data: result})
 
-    app.use('/user', router)
-}
+    })
+
+router.route('/signin')
+    .post(async (req,res)=>{
+        try {
+            let {username, password} = req.body
+            if(!username || !password) return res.json({status: false, message: "username or password null"})
+            let result = await UserController.signin({username,password})
+            if(result.err) return res.json({status: false, message: result.err})
+            return res.json({status: true, data: result})
+        } catch (error) {
+            return res.json({status: false, message: "Login fail"})
+        }
+    })
+
+ module.exports = router

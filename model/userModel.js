@@ -18,9 +18,11 @@ var UserModel = {
      * @param {object} data 
      * @returns {object}
      */
-    create: function (data){
-        try {                        
-            if(!data._id) data._id = (new ObjectId()).toHexString()            
+    insertOne: function (data){
+        try {         
+            data.createdAt = new Date().getTime()
+            data.deleted = false               
+            if(!data._id) data._id = (new ObjectId()).toHexString()                      
             return _collection.insertOne(data)
             
         } catch (error) {            
@@ -28,7 +30,7 @@ var UserModel = {
         }
     },
 
-    read: async (_id)=>{
+    findOne: async (_id)=>{
         try {
             let doc = await _collection.findOne({_id})
             return doc
@@ -37,18 +39,29 @@ var UserModel = {
         }
     },
 
-    update: async (_id, data)=>{
+    updateOne: async (_id, data)=>{
+        try {
+            delete data.createdAt
+            delete data.deleted
+            let doc = await _collection
+                .findOneAndUpdate({_id}, {$set: data},{returnOriginal: false})                
+            return doc.value
+        } catch (error) {            
+            return {err: error}
+        }
+    },
+
+    deleteOne: async (_id)=>{
         try {
             let doc = await _collection
-                .findOneAndUpdate({_id}, {$set: data},{returnOriginal: false})
-            console.log("update", doc)
+                .findOneAndUpdate({_id}, {$set: {deleted: true}},{returnOriginal: false})
             return doc.value
         } catch (error) {            
             return {err: error}
         }
     },
     
-    delete: async (_id)=>{
+    removeOne: async (_id)=>{
         try {
             let doc = await _collection.findOneAndDelete({_id})                       
             return doc.value
@@ -57,11 +70,33 @@ var UserModel = {
         }
     },
 
-    queryByFields: async (fields)=>{
-        try {
-            let doc = await _collection.find(fields).toArray()
+    queryByFields: async (filter)=>{
+        try {            
+            console.log(filter)
+            filter.deleted = false        
+            let doc = await _collection.find(filter).toArray()            
             return doc
         } catch (error) {
+            return {err: error}
+        }
+    },
+
+    getMany: async (limit, skip, filter, sort)=>{
+        try {            
+            filter.deleted = false        
+            let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()            
+            return doc
+        } catch (error) {
+            return {err: error}
+        }
+    },
+
+    count: async (filter)=>{
+        try{
+            filter.deleted = false
+            let total = await _collection.count(filter)
+            return total
+        }catch(error){
             return error
         }
     }
