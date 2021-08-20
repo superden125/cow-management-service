@@ -1,10 +1,15 @@
 "use strict";
 const UserModel = require('../model/userModel')
+const AreaModel = require('../model/areaModel')
 const pwd =  require('../lib/password')
 
 const User = {
     insertOne: async (data)=>{
         try {
+            if(!data.idArea) return {err: "id area null"}
+            let area = await AreaModel.findOne(data.idArea)
+            if(!area) return {err: "id area not found"}
+
             data.password = pwd.hash(data.password)
             let user = await UserModel.insertOne(data)
             if(user.insertedId){
@@ -21,6 +26,11 @@ const User = {
         try {
             let user = await UserModel.findOne(id)
             delete user.password
+            if(!user) return {err: "user not found"}
+
+            let area = await AreaModel.findOne(user.idArea)
+            if(!area) return {err: "area not found"}
+            user.areaName = area.name
             return user
         } catch (error) {
             return {err: error}
@@ -31,6 +41,10 @@ const User = {
     },
     updateOne: async (id,data)=>{
         try {
+            if(data.idArea){
+                let area = await AreaModel.findOne(data.idArea)
+                if(!area) return {err: "id area not found"}
+            }
             let user = await UserModel.updateOne(id,data)
             delete user.password
             if(!user) return {err: "update false"}
@@ -57,7 +71,7 @@ const User = {
             sortOption[s]=v
         }
 
-        let items = await UserModel.getMany(limit, skip, filter, sortOption)
+        let items = await UserModel.getMany(limit, skip, sortOption, filter)
         let totalCount = await UserModel.count(filter)
         return {totalCount,items}
     },

@@ -23,7 +23,11 @@ connectDB((err)=>{
         res.json({service: "cow management service", auth: "sd"})
     })
 
-    app.use('/api/user', require('./route/user'))    
+    app.use('/api/user', require('./route/user'))
+    app.use('/api/cow', require('./route/cow'))
+    app.use('/api/area', require('./route/area'))
+    app.use('/api/cowbreed', require('./route/cowBreed'))
+    app.use('/api/groupcow', require('./route/groupCow'))
     
     app.listen(3000, ()=>{
         console.log(`server listening on port ${PORT}...`)

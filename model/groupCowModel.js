@@ -2,12 +2,12 @@
 const DB = require('./index')
 const ObjectId = require('mongodb').ObjectId
 
-const collectionName = 'user'
+const collectionName = 'groupCow'
 
 let _db = DB.getDb()
 let _collection = _db.collection(collectionName)
 
-var UserModel = {    
+var GroupCow = {    
 
     insertOne: function (data){
         try {         
@@ -63,7 +63,6 @@ var UserModel = {
 
     queryByFields: async (filter)=>{
         try {            
-            console.log(filter)
             filter.deleted = false        
             let doc = await _collection.find(filter).toArray()            
             return doc
@@ -93,4 +92,4 @@ var UserModel = {
     }
 }
 
-module.exports = UserModel
+module.exports = GroupCow

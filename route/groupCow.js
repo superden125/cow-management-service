@@ -1,5 +1,5 @@
 const express = require('express')
-const CowController = require('../controller/cow')
+const GroupCowController = require('../controller/groupCow')
 
 
 const router = express.Router()    
@@ -7,21 +7,21 @@ const router = express.Router()
 router.route('/:id')
     .get(async (req,res)=>{
         let id = req.params.id
-        let cow = await CowController.findById(id)        
-        if(!cow) return res.json({status: false, message: "cow not found"})            
-        res.json({status: true, data: cow})
+        let groupCow = await GroupCowController.findById(id)        
+        if(!groupCow) return res.json({status: false, message: "groupCow not found"})            
+        res.json({status: true, data: groupCow})
     })
     .put(async (req,res)=>{
         let id = req.params.id
         let data = req.body
-        let cow = await CowController.updateOne(id,data)
-        if(cow.err) return res.json({status: false, message: cow.err})
+        let groupCow = await GroupCowController.updateOne(id,data)
+        if(groupCow.err) return res.json({status: false, message: groupCow.err})
         res.json({status: true})
     })
     .delete(async (req,res)=>{
         let id = req.params.id
-        let cow = await CowController.deleteById(id)
-        if(!cow) return res.json({status: false, message: "cow not found"})
+        let groupCow = await GroupCowController.deleteById(id)
+        if(!groupCow) return res.json({status: false, message: "groupCow not found"})
         res.json({status: true})
     })
 
@@ -31,16 +31,16 @@ router.route('/')
             let query = req.query
             query.limit = query.limit ? query.limit : query.take
             delete query.take        
-            let cows = await CowController.getMany(query)
-            res.json({status: true, data: cows})
+            let groupCows = await GroupCowController.getMany(query)
+            res.json({status: true, data: groupCows})
         } catch (error) {
             return res.json({status: false, data:[], message: "Error query data"})
         }
     })
     .post(async (req,res)=>{
         let data = req.body                                    
-        let result = await CowController.insertOne(data)
-        if(result.err) return res.json({status: false, message: result.err})        
+        let result = await GroupCowController.insertOne(data)        
+        if(result.err) return res.json({status: false}) 
         return res.json({status: true, data: result})
 
     })

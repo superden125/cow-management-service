@@ -1,5 +1,5 @@
 const express = require('express')
-const CowController = require('../controller/cow')
+const AreaController = require('../controller/area')
 
 
 const router = express.Router()    
@@ -7,21 +7,21 @@ const router = express.Router()
 router.route('/:id')
     .get(async (req,res)=>{
         let id = req.params.id
-        let cow = await CowController.findById(id)        
-        if(!cow) return res.json({status: false, message: "cow not found"})            
-        res.json({status: true, data: cow})
+        let area = await AreaController.findById(id)        
+        if(!area) return res.json({status: false, msg: "area not found"})            
+        res.json({status: true, data: area})
     })
     .put(async (req,res)=>{
         let id = req.params.id
         let data = req.body
-        let cow = await CowController.updateOne(id,data)
-        if(cow.err) return res.json({status: false, message: cow.err})
+        let area = await AreaController.updateOne(id,data)
+        if(area.err) return res.json({status: false, msg: "something wrong"})
         res.json({status: true})
     })
     .delete(async (req,res)=>{
         let id = req.params.id
-        let cow = await CowController.deleteById(id)
-        if(!cow) return res.json({status: false, message: "cow not found"})
+        let area = await AreaController.deleteById(id)
+        if(!area) return res.json({status: false, msg: "area not found"})
         res.json({status: true})
     })
 
@@ -31,16 +31,16 @@ router.route('/')
             let query = req.query
             query.limit = query.limit ? query.limit : query.take
             delete query.take        
-            let cows = await CowController.getMany(query)
-            res.json({status: true, data: cows})
+            let areas = await AreaController.getMany(query)
+            res.json({status: true, data: areas})
         } catch (error) {
             return res.json({status: false, data:[], message: "Error query data"})
         }
     })
     .post(async (req,res)=>{
         let data = req.body                                    
-        let result = await CowController.insertOne(data)
-        if(result.err) return res.json({status: false, message: result.err})        
+        let result = await AreaController.insertOne(data)        
+        if(result.err) return res.json({status: false}) 
         return res.json({status: true, data: result})
 
     })

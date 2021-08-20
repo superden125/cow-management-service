@@ -2,12 +2,12 @@
 const DB = require('./index')
 const ObjectId = require('mongodb').ObjectId
 
-const collectionName = 'user'
+const collectionName = 'cow'
 
 let _db = DB.getDb()
 let _collection = _db.collection(collectionName)
 
-var UserModel = {    
+var CowModel = {    
 
     insertOne: function (data){
         try {         
@@ -93,4 +93,4 @@ var UserModel = {
     }
 }
 
-module.exports = UserModel
+module.exports = CowModel
