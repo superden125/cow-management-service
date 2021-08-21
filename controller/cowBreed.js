@@ -4,9 +4,16 @@ const CowBreedModel = require('../model/cowBreedModel')
 const CowBreed = {
     insertOne: async (data)=>{
         try {
+            //check null
+            if(!data.name) return {err: "name null"}
+            if(!data.farmingTime) return {err: "farmingTime null"}
+
+            //check farmingTime
             data.farmingTime = parseInt(data.farmingTime)
             if(Number.isInteger(data.farmingTime) == false)
                 return {err: "farming time invalid"}
+
+            //insert db
             let cowBreed = await CowBreedModel.insertOne(data)
             if(cowBreed.insertedId){                
                 return data
@@ -30,12 +37,14 @@ const CowBreed = {
     },
     updateOne: async (id,data)=>{
         try {
+            //check formingTime
             if(data.farmingTime){
                 data.farmingTime = parseInt(data.farmingTime)
                 if(Number.isInteger(data.farmingTime) == false)
                     return {err: "farming time invalid"}
             }
             
+            //update db
             let cowBreed = await CowBreedModel.updateOne(id,data)            
             if(!cowBreed) return {err: "update false"}
             return true

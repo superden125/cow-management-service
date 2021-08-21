@@ -6,7 +6,13 @@ const pwd =  require('../lib/password')
 const User = {
     insertOne: async (data)=>{
         try {
+            //check data
             if(!data.idArea) return {err: "id area null"}
+            if(!data.username) return {err: "username null"}
+            if(!data.password) return {err: "password null"}
+            if(!data.role) data.role = 'breeder'
+
+            //check area
             let area = await AreaModel.findOne(data.idArea)
             if(!area) return {err: "id area not found"}
 

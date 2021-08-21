@@ -3,7 +3,8 @@ const AreaModel = require('../model/areaModel')
 
 const Area = {
     insertOne: async (data)=>{
-        try {            
+        try {
+            if(!data.name) return {err: "name null"}
             let area = await AreaModel.insertOne(data)
             if(area.insertedId){                
                 return data
@@ -27,6 +28,7 @@ const Area = {
     },
     updateOne: async (id,data)=>{
         try {
+            if(!data.name) return {err: "name null"}
             let area = await AreaModel.updateOne(id,data)            
             if(!area) return {err: "update false"}
             return true

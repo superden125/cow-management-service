@@ -3,9 +3,7 @@ require('dotenv/config')
 import express from 'express'
 import bodyParser from 'body-parser'
 import {connectDB} from './model/index'
-
-const PORT = process.env.PORT || 3000
-
+import {port} from './config/host'
 
 const app = express()
 app.use(bodyParser.json())
@@ -15,6 +13,7 @@ connectDB((err)=>{
     
     if(err){
         console.log("connect db error", err)
+        console.log("service shutdown")
         return
     }
     console.log("connected db...")
@@ -28,8 +27,11 @@ connectDB((err)=>{
     app.use('/api/area', require('./route/area'))
     app.use('/api/cowbreed', require('./route/cowBreed'))
     app.use('/api/groupcow', require('./route/groupCow'))
+    app.use('/api/food', require('./route/food'))
+    app.use('/api/diaryfeed',require('./route/diaryFedd'))
+    app.use('/api/period',require('./route/period'))
     
-    app.listen(3000, ()=>{
-        console.log(`server listening on port ${PORT}...`)
+    app.listen(port, ()=>{
+        console.log(`server listening on port ${port}...`)
     })
 })

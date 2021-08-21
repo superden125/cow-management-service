@@ -3,7 +3,8 @@ const GroupCowModel = require('../model/groupCowModel')
 
 const GroupCow = {
     insertOne: async (data)=>{
-        try {            
+        try {
+            if(!data.name) return {err: "name null"} 
             let groupCow = await GroupCowModel.insertOne(data)
             if(groupCow.insertedId){                
                 return data

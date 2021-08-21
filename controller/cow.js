@@ -7,20 +7,28 @@ const GroupCow = require('../model/groupCowModel')
 const Cow = {
     insertOne: async (data)=>{
         try {
+            //check null
+            if(!data.idUser) return {err: "idUser null"}
+            if(!data.idCowBreed) return {err: "idCowBreed null"}
+            if(!data.birthday) return {err: "birthday null"}
             
+            //check user
             let user = await UserModel.findOne(data.idUser)
-            if(!user) return {err: "user not found"}
+            if(!user) return {err: "user not found"}            
+
+            //check cowBreed
             let cowBreed = await CowBreed.findOne(data.idCowBreed)
             if(!cowBreed) return {err: "cow breed not found"}
 
+            //check group cow
             if(data.idGroupCow){
                 let groupCow = await GroupCow.findOne(data.idGroupCow)
                 if(!groupCow) return {err: "group cow not found"}
             }
 
-            data.ageDaysStart = parseInt(data.ageDaysStart)
-            if(Number.isInteger(data.ageDaysStart)==false)
-                return {err: "age days start invalid"}            
+            data.birthday = parseInt(data.birthday)
+            if(Number.isInteger(data.birthday)==false)
+                return {err: "birthday invalid"}            
 
             let cow = await CowModel.insertOne(data)
             if(cow.insertedId){                
@@ -60,12 +68,11 @@ const Cow = {
                 let groupCow = await GroupCow.findOne(data.idGroupCow)
                 if(!groupCow) return {err: "group cow not found"}
             }
-            if(data.ageDaysStart){
-                data.ageDaysStart = parseInt(data.ageDaysStart)
-                if(Number.isInteger(data.ageDaysStart)==false)
-                    return {err: "age days start invalid"}
-            }
-            
+            if(data.birthday){
+                data.birthday = parseInt(data.birthday)
+                if(Number.isInteger(data.birthday)==false)
+                    return {err: "birthday invalid"}
+            }            
 
             let cow = await CowModel.updateOne(id,data)            
             if(!cow) return {err: "update false"}
