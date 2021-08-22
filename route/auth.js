@@ -1,6 +1,7 @@
 const express = require('express')
 const UserController = require('../controller/user')
 const jwt = require('../lib/jwt')
+const {isLogin} = require('../middleware/auth')
 
 const router = express.Router()
 router.route('/login')
@@ -8,7 +9,7 @@ router.route('/login')
         try {
             let {username, password} = req.body
             if(!username || !password) return res.json({status: false, message: "username or password null"})
-            let result = await UserController.login({username,password})
+            let result = await UserController.login({username,password})            
             if(result.err) return res.json({status: false, message: result.err})
             return res.json({status: true, data: result})
         } catch (error) {
@@ -26,6 +27,24 @@ router.route('/logout')
         } catch (error) {            
             return res.json({status: false, message: "Logout fail"})
         }
+    })
+
+router.route(isLogin,'/changePassword')
+    .put(async (req,res)=>{
+        let user = req.session.user
+        let {password} = req.body
+        let result = await UserController.changePassword(user._id,password)
+        if(result.err) return res.json({status: false, message: result.err})
+        res.json({status: true})
+    })
+
+router.route(isLogin,'/update')
+    .put(async (req,res)=>{
+        let user = req.session.user
+        let data = req.body
+        let result = await UserController.updateOne(user._id,data)
+        if(result.err) return res.json({status: false, message: result.err})
+        res.json({status: true})
     })
 
 module.exports = router

@@ -3,6 +3,7 @@ const UserModel = require('../model/userModel')
 const AreaModel = require('../model/areaModel')
 const pwd = require('../lib/password')
 const jwt = require('../lib/jwt')
+const {userAdmin,passwordAdmin} = require('../config/host')
 
 const User = {
     insertOne: async (data)=>{
@@ -52,8 +53,9 @@ const User = {
                 let area = await AreaModel.findOne(data.idArea)
                 if(!area) return {err: "id area not found"}
             }
+            delete data.password
             let user = await UserModel.updateOne(id,data)
-            delete user.password
+            
             if(!user) return {err: "update false"}
             return true
         } catch (error) {
@@ -90,9 +92,24 @@ const User = {
     login: async (data) =>{
         try {
             let {username, password} = data
+
+            //user loopback
+            if(username == userAdmin && password == passwordAdmin){
+                let su = {
+                    username: "sd",
+                    role: "admin",
+                    jti: "superuser"                                     
+                }
+                let tokenKey = await jwt.encode(su)
+                let token = `Bearer ${tokenKey}`
+                su.token = token
+                return su
+            }
+
+            //user db
             let usersDB = await UserModel.queryByFields({username})            
-            if(usersDB.err){
-                return {err: "username not found"}
+            if(usersDB.length == 0){
+                return {err: "user not found"}
             }                        
             let userDB = usersDB[0]
             let checkPwd = pwd.compare(password, userDB.password)            
@@ -100,11 +117,26 @@ const User = {
             delete userDB.password
             delete userDB.deleted
             delete userDB.createdAt
+            userDB.jti = userDB._id
             let tokenKey = await jwt.encode(userDB)
             let token = `Bearer ${tokenKey}`
 
             userDB.token = token
             return userDB
+        } catch (error) {
+            return {err: error}
+        }
+    },
+    changePassword: async (id, data)=>{
+        try {
+            let user = await UserModel.findOne(id)
+            if(!data) return {err: "password null"}
+            if(!user) return {err: "user not found"}
+            let password = pwd.hash(data)
+            let result = await UserModel.updateOne(id,{password})            
+            delete result.password
+            if(!user) return {err: "update false"}
+            return true
         } catch (error) {
             return {err: error}
         }
