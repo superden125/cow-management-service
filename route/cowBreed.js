@@ -1,8 +1,8 @@
 const express = require('express')
 const CowBreedController = require('../controller/cowBreed')
+const {isManager} = require('../middleware/auth')
 
-
-const router = express.Router()    
+const router = express.Router()
 
 router.route('/:id')
     .get(async (req,res)=>{
@@ -11,14 +11,14 @@ router.route('/:id')
         if(!cowBreed) return res.json({status: false, message: "cowBreed not found"})            
         res.json({status: true, data: cowBreed})
     })
-    .put(async (req,res)=>{
+    .put(isManager,async (req,res)=>{
         let id = req.params.id
         let data = req.body
         let cowBreed = await CowBreedController.updateOne(id,data)
         if(cowBreed.err) return res.json({status: false, message: cowBreed.err})
         res.json({status: true})
     })
-    .delete(async (req,res)=>{
+    .delete(isManager,async (req,res)=>{
         let id = req.params.id
         let cowBreed = await CowBreedController.deleteById(id)
         if(!cowBreed) return res.json({status: false, message: "cowBreed not found"})
@@ -37,7 +37,7 @@ router.route('/')
             return res.json({status: false, data:[], message: "Error query data"})
         }
     })
-    .post(async (req,res)=>{
+    .post(isManager, async (req,res)=>{
         let data = req.body                                    
         let result = await CowBreedController.insertOne(data)        
         if(result.err) return res.json({status: false, message: result.err}) 

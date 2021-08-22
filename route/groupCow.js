@@ -1,7 +1,6 @@
 const express = require('express')
 const GroupCowController = require('../controller/groupCow')
 
-
 const router = express.Router()    
 
 router.route('/:id')

@@ -1,7 +1,8 @@
 "use strict";
 const UserModel = require('../model/userModel')
 const AreaModel = require('../model/areaModel')
-const pwd =  require('../lib/password')
+const pwd = require('../lib/password')
+const jwt = require('../lib/jwt')
 
 const User = {
     insertOne: async (data)=>{
@@ -69,7 +70,7 @@ const User = {
         if(limit > 100) limit = 100
 
         filter = filter ? filter : {}
-        console.log(sort)
+        
         if(sort){
             let s = sort.split(' ')[0]
             let v = sort.split(' ')[1]
@@ -86,20 +87,23 @@ const User = {
         UserModel.count(filter)
     },
 
-    signin: async (data) =>{
+    login: async (data) =>{
         try {
             let {username, password} = data
             let usersDB = await UserModel.queryByFields({username})            
             if(usersDB.err){
                 return {err: "username not found"}
-            }            
-            console.log(usersDB)
+            }                        
             let userDB = usersDB[0]
-            let checkPwd = pwd.compare(password, userDB.password)
-            console.log(checkPwd)
+            let checkPwd = pwd.compare(password, userDB.password)            
             if(!checkPwd) return {err: "password wrong"}
             delete userDB.password
-            userDB.session_key = "x-session-key"
+            delete userDB.deleted
+            delete userDB.createdAt
+            let tokenKey = await jwt.encode(userDB)
+            let token = `Bearer ${tokenKey}`
+
+            userDB.token = token
             return userDB
         } catch (error) {
             return {err: error}

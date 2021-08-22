@@ -1,8 +1,12 @@
 const express = require('express')
 const UserController = require('../controller/user')
+const {isAdmin} = require('../middleware/auth')
 
 
-const router = express.Router()    
+const router = express.Router()
+
+//middleware auth admin
+router.use(isAdmin)
 
 router.route('/:id')
     .get(async (req,res)=>{
@@ -27,7 +31,7 @@ router.route('/:id')
 
 router.route('/')
     .get(async (req,res)=>{
-        try {
+        try {            
             let query = req.query
             query.limit = query.limit ? query.limit : query.take
             delete query.take        
@@ -43,19 +47,6 @@ router.route('/')
         if(result.err) return res.json({status: false, message: result.err})
         return res.json({status: true, data: result})
 
-    })
-
-router.route('/login')
-    .post(async (req,res)=>{
-        try {
-            let {username, password} = req.body
-            if(!username || !password) return res.json({status: false, message: "username or password null"})
-            let result = await UserController.signin({username,password})
-            if(result.err) return res.json({status: false, message: result.err})
-            return res.json({status: true, data: result})
-        } catch (error) {
-            return res.json({status: false, message: "Login fail"})
-        }
     })
 
  module.exports = router

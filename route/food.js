@@ -1,8 +1,8 @@
 const express = require('express')
 const FoodController = require('../controller/food')
+const {isManager} = require('../middleware/auth')
 
-
-const router = express.Router()    
+const router = express.Router()
 
 router.route('/:id')
     .get(async (req,res)=>{
@@ -11,14 +11,14 @@ router.route('/:id')
         if(!food) return res.json({status: false, message: "food not found"})            
         res.json({status: true, data: food})
     })
-    .put(async (req,res)=>{
+    .put(isManager, async (req,res)=>{
         let id = req.params.id
         let data = req.body
         let food = await FoodController.updateOne(id,data)
         if(food.err) return res.json({status: false, message: food.err})
         res.json({status: true})
     })
-    .delete(async (req,res)=>{
+    .delete(isManager, async (req,res)=>{
         let id = req.params.id
         let food = await FoodController.deleteById(id)
         if(!food) return res.json({status: false, message: "food not found"})
@@ -37,7 +37,7 @@ router.route('/')
             return res.json({status: false, data:[], message: "Error query data"})
         }
     })
-    .post(async (req,res)=>{
+    .post(isManager, async (req,res)=>{
         let data = req.body                                    
         let result = await FoodController.insertOne(data)        
         if(result.err) return res.json({status: false, message: result.err}) 

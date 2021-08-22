@@ -1,27 +1,29 @@
 const express = require('express')
 const AreaController = require('../controller/area')
-
+const {isAdmin, isManager} = require('../middleware/auth')
 
 const router = express.Router()    
+
+router.use(isManager)
 
 router.route('/:id')
     .get(async (req,res)=>{
         let id = req.params.id
         let area = await AreaController.findById(id)        
-        if(!area) return res.json({status: false, msg: "area not found"})            
+        if(!area) return res.json({status: false, message: "area not found"})            
         res.json({status: true, data: area})
     })
-    .put(async (req,res)=>{
+    .put(isAdmin, async (req,res)=>{
         let id = req.params.id
         let data = req.body
         let area = await AreaController.updateOne(id,data)
-        if(area.err) return res.json({status: false, msg: "something wrong"})
+        if(area.err) return res.json({status: false, message: area.err})
         res.json({status: true})
     })
-    .delete(async (req,res)=>{
+    .delete(isAdmin, async (req,res)=>{
         let id = req.params.id
         let area = await AreaController.deleteById(id)
-        if(!area) return res.json({status: false, msg: "area not found"})
+        if(!area) return res.json({status: false, message: "area not found"})
         res.json({status: true})
     })
 
@@ -37,10 +39,10 @@ router.route('/')
             return res.json({status: false, data:[], message: "Error query data"})
         }
     })
-    .post(async (req,res)=>{
+    .post(isAdmin, async (req,res)=>{
         let data = req.body                                    
         let result = await AreaController.insertOne(data)        
-        if(result.err) return res.json({status: false}) 
+        if(result.err) return res.json({status: false, message: result.err}) 
         return res.json({status: true, data: result})
 
     })
