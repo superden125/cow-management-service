@@ -29,8 +29,8 @@ router.route('/logout')
         }
     })
 
-router.route(isLogin,'/changePassword')
-    .put(async (req,res)=>{
+router.route('/changePassword')
+    .put(isLogin, async (req,res)=>{
         let user = req.session.user
         let {password} = req.body
         let result = await UserController.changePassword(user._id,password)
@@ -38,8 +38,8 @@ router.route(isLogin,'/changePassword')
         res.json({status: true})
     })
 
-router.route(isLogin,'/update')
-    .put(async (req,res)=>{
+router.route('/update')
+    .put(isLogin, async (req,res)=>{
         let user = req.session.user
         let data = req.body
         let result = await UserController.updateOne(user._id,data)

@@ -10,7 +10,7 @@ let _collection = _db.collection(collectionName)
 var UserModel = {    
 
     insertOne: function (data){
-        try {         
+        try {     
             data.createdAt = new Date().getTime()
             data.deleted = false               
             if(!data._id) data._id = (new ObjectId()).toHexString()                      
@@ -72,10 +72,12 @@ var UserModel = {
         }
     },
 
-    getMany: async (limit, skip, sort, filter)=>{
+    getMany: async (limit, skip, sort, filter, search)=>{
         try {            
-            filter.deleted = false        
-            let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()            
+            filter.deleted = false
+            if(search) Object.assign(filter,{$text: {$search: search}})
+            let doc = await _collection.find(filter).project({ password: 0}).limit(limit).skip(skip).sort(sort).toArray()    
+            console.log("doc sear", doc)       
             return doc
         } catch (error) {
             return {err: error}
@@ -89,6 +91,16 @@ var UserModel = {
             return total
         }catch(error){
             return error
+        }
+    },
+    search: async (s, filter)=>{
+        try {            
+            let result = await _collection.find({ $text :{ $search: s}}).toArray()
+            console.log("res",result)
+            return result
+        } catch (error) {
+            console.log("eerre,",error)
+            return {err: "not found"}
         }
     }
 }

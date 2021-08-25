@@ -36,6 +36,7 @@ connectDB((err)=>{
 
     app.use('/api/auth', require('./route/auth'))
     app.use('/api',isLogin)
+    app.use('/api/admin', require('./route/admin'))
     app.use('/api/user', require('./route/user'))
     app.use('/api/cow', require('./route/cow'))
     app.use('/api/area', require('./route/area'))

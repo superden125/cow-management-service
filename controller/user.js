@@ -18,6 +18,9 @@ const User = {
             let area = await AreaModel.findOne(data.idArea)
             if(!area) return {err: "id area not found"}
 
+            // let checkUser = await UserModel.queryByFields({username: data.username})
+            // if(checkUser)
+
             data.password = pwd.hash(data.password)
             let user = await UserModel.insertOne(data)
             if(user.insertedId){
@@ -30,6 +33,17 @@ const User = {
             return {err: error}
         }
     },
+    
+    queryByFields: async (query)=>{
+        try{
+            let result = await UserModel.queryByFields(query)
+            if(result.err) return {err: result.err}
+            return result
+        }catch(error){
+            return {err: error}
+        }
+    },
+
     findById: async (id)=>{
         try {
             let user = await UserModel.findOne(id)
@@ -52,8 +66,9 @@ const User = {
             if(data.idArea){
                 let area = await AreaModel.findOne(data.idArea)
                 if(!area) return {err: "id area not found"}
-            }
+            }            
             delete data.password
+            delete data.username
             let user = await UserModel.updateOne(id,data)
             
             if(!user) return {err: "update false"}
@@ -64,7 +79,7 @@ const User = {
         
     },
     getMany: async (query)=>{
-        let {limit, skip, filter,sort} = query
+        let {limit, skip, filter, sort, search} = query
         let sortOption = {}
         skip = skip ? parseInt(skip) : 0
 
@@ -72,7 +87,7 @@ const User = {
         if(limit > 100) limit = 100
 
         filter = filter ? filter : {}
-        
+        console.log("filter",filter)
         if(sort){
             let s = sort.split(' ')[0]
             let v = sort.split(' ')[1]
@@ -80,13 +95,50 @@ const User = {
             sortOption[s]=v
         }
 
-        let items = await UserModel.getMany(limit, skip, sortOption, filter)
+        let items = await UserModel.getMany(limit, skip, sortOption, filter, search)
         let totalCount = await UserModel.count(filter)
+        console.log("tem",items)
         return {totalCount,items}
     },
 
     count: (filter) =>{
         UserModel.count(filter)
+    },
+
+    updateBreeder: async (idManager, idBreeder, data)=>{
+        try {
+            let manager = await UserModel.findOne(idManager)
+            if(!manager || manager.role != 'manager') return {err: "manager not found"}
+            let breeder = await UserModel.findOne(idBreeder)
+            if(!breeder || breeder.role != 'breeder' ) return {err: "breeder not found"}
+
+            data.idManager = idManager
+
+            if(data.idArea){
+                let area = await AreaModel.findOne(data.idArea)
+                if(!area) return {err: "id area not found"}
+            }            
+            delete data.password
+            delete data.username
+            let user = await UserModel.updateOne(idBreeder,data)
+            
+            if(!user) return {err: "update false"}
+            return true            
+        } catch (error) {
+            return {err: error}
+        }
+    },
+
+    deleteBreeder: async (idBreeder)=>{
+        try {
+            let breeder = await UserModel.queryByFields({_id: idBreeder, role: 'breeder'})
+            if(breeder.length==0) return {err: "breeder not found"}
+            let result = await UserModel.deleteOne(idBreeder)
+            if(result.err) return {err: result.err}
+            return result
+        } catch (error) {
+            return {err: error}
+        }
     },
 
     login: async (data) =>{
@@ -137,6 +189,15 @@ const User = {
             delete result.password
             if(!user) return {err: "update false"}
             return true
+        } catch (error) {
+            return {err: error}
+        }
+    },
+    search: async (s, filter)=>{
+        try {
+            filter = filter ? filter : {}
+            let result = await UserModel.search(s)
+            return result
         } catch (error) {
             return {err: error}
         }
