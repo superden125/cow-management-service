@@ -36,8 +36,8 @@ router.route('/getAllBreeder')
         try {
             let user = req.session.user        
             let query = req.query
-            query.limit = query.limit ? query.limit : query.take
-            delete query.take
+            // query.limit = query.limit ? query.limit : query.take
+            // delete query.take
             query.filter = query.filter ? query.filter: {}
             query.filter.idManager = user._id            
             let users = await UserController.getMany(query)

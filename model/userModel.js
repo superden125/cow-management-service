@@ -74,8 +74,12 @@ var UserModel = {
 
     getMany: async (limit, skip, sort, filter, search)=>{
         try {            
-            filter.deleted = false
-            if(search) Object.assign(filter,{$text: {$search: search}})
+            filter.deleted = false            
+            if(search){
+                let re = new RegExp(search,'i')
+                Object.assign(filter,{$or: [{ username: { $regex: re } },  { name: { $regex: re }}, { email: { $regex: re }} ] })
+            } 
+            console.log("fileter", filter.$or)
             let doc = await _collection.find(filter).project({ password: 0}).limit(limit).skip(skip).sort(sort).toArray()    
             console.log("doc sear", doc)       
             return doc

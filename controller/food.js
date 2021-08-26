@@ -52,7 +52,7 @@ const Food = {
         
     },
     getMany: async (query)=>{
-        let {limit, skip, filter,sort} = query
+        let {limit, skip, filter,sort, search} = query
         let sortOption = {}
         skip = skip ? parseInt(skip) : 0
 
@@ -60,7 +60,7 @@ const Food = {
         if(limit > 100) limit = 100
 
         filter = filter ? filter : {}
-        console.log(sort)
+        
         if(sort){
             let s = sort.split(' ')[0]
             let v = sort.split(' ')[1]
@@ -68,7 +68,7 @@ const Food = {
             sortOption[s]=v
         }
 
-        let items = await FoodModel.getMany(limit, skip, sortOption, filter)
+        let items = await FoodModel.getMany(limit, skip, sortOption, filter, search)
         let totalCount = await FoodModel.count(filter)
         return {totalCount,items}
     },

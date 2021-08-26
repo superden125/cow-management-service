@@ -28,9 +28,14 @@ router.route('/:id')
 router.route('/')
     .get(async (req,res)=>{
         try {
+            let user = req.session.user
             let query = req.query
-            query.limit = query.limit ? query.limit : query.take
-            delete query.take        
+            if(user.role!='admin'){
+                query.filter = query.filter ? query.filter : {}
+                query.filter.idArea = user.idArea
+            }            
+            // query.limit = query.limit ? query.limit : query.take
+            // delete query.take        
             let foods = await FoodController.getMany(query)
             res.json({status: true, data: foods})
         } catch (error) {
@@ -38,7 +43,13 @@ router.route('/')
         }
     })
     .post(isManager, async (req,res)=>{
-        let data = req.body                                    
+        let data = req.body
+        let user = req.session.user
+        
+        if(user.role!='admin'){
+            data.idArea = user.idArea
+        }
+        
         let result = await FoodController.insertOne(data)        
         if(result.err) return res.json({status: false, message: result.err}) 
         return res.json({status: true, data: result})

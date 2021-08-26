@@ -10,7 +10,16 @@ let _collection = _db.collection(collectionName)
 var CowBreed = {    
 
     insertOne: function (data){
-        try {         
+        try {
+            //check null
+            if(!data.name) return {err: "name null"}
+            if(!data.farmingTime) return {err: "farmingTime null"}
+
+            //check farmingTime
+            data.farmingTime = parseInt(data.farmingTime)
+            if(Number.isInteger(data.farmingTime) == false)
+                return {err: "farming time invalid"}
+
             data.createdAt = new Date().getTime()
             data.deleted = false               
             if(!data._id) data._id = (new ObjectId()).toHexString()                      
@@ -32,6 +41,13 @@ var CowBreed = {
 
     updateOne: async (_id, data)=>{
         try {
+            //check formingTime
+            if(data.farmingTime){
+                data.farmingTime = parseInt(data.farmingTime)
+                if(Number.isInteger(data.farmingTime) == false)
+                    return {err: "farming time invalid"}
+            }
+
             delete data.createdAt
             delete data.deleted
             let doc = await _collection
@@ -71,9 +87,13 @@ var CowBreed = {
         }
     },
 
-    getMany: async (limit, skip, sort, filter)=>{
+    getMany: async (limit, skip, sort, filter, search)=>{
         try {            
-            filter.deleted = false        
+            filter.deleted = false
+            if(search){
+                let re = new RegExp(search, 'i')
+                Object.assign(filter, {name: {$regex: re}})
+            }
             let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()            
             return doc
         } catch (error) {

@@ -34,6 +34,7 @@ var PeriodModel = {
         try {
             delete data.createdAt
             delete data.deleted
+            delete data._id
             let doc = await _collection
                 .findOneAndUpdate({_id}, {$set: data},{returnOriginal: false})                
             return doc.value
@@ -89,7 +90,17 @@ var PeriodModel = {
         }catch(error){
             return error
         }
-    }
+    },
+
+    removeMany: async (filter)=>{
+        try {            
+            let doc = await _collection
+                .updateMany(filter, {$set: {deleted: true}},{returnOriginal: false})            
+            return doc.value
+        } catch (error) {            
+            return {err: error}
+        }
+    },
 }
 
 module.exports = PeriodModel

@@ -71,9 +71,13 @@ var FoodModel = {
         }
     },
 
-    getMany: async (limit, skip, sort, filter)=>{
+    getMany: async (limit, skip, sort, filter, search)=>{
         try {            
-            filter.deleted = false        
+            filter.deleted = false
+            if(search){
+                let re = new RegExp(search, 'i')
+                Object.assign(filter, {name: {$regex: re}})
+            }
             let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()            
             return doc
         } catch (error) {
