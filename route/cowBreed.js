@@ -1,5 +1,6 @@
 const express = require('express')
 const CowBreedController = require('../controller/cowBreed')
+const PeriodController = require('../controller/period')
 const {isManager} = require('../middleware/auth')
 
 const router = express.Router()
@@ -51,7 +52,5 @@ router.route('/')
         }
 
     })
-
-
 
  module.exports = router

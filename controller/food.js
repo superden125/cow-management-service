@@ -25,7 +25,12 @@ const Food = {
     },
     findById: async (id)=>{
         try {
-            let food = await FoodModel.findOne(id)            
+            let food = await FoodModel.findOne(id)
+            if(food){
+                let area = await AreaModel.findOne(food.idArea)
+                if(area)
+                    food.areaName = area.name
+            }        
             return food
         } catch (error) {
             return {err: error}
@@ -68,7 +73,14 @@ const Food = {
             sortOption[s]=v
         }
 
-        let items = await FoodModel.getMany(limit, skip, sortOption, filter, search)
+        let items = await FoodModel.getMany(limit, skip, sortOption, filter, search)        
+        if(items.length>0){
+            items.forEach(async (item)=>{
+                let area = await AreaModel.findOne(item.idArea)
+                if(area)
+                    item.areaName = area.name
+            })
+        }
         let totalCount = await FoodModel.count(filter)
         return {totalCount,items}
     },

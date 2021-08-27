@@ -77,6 +77,7 @@ var DiaryFeedModel = {
             let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()            
             return doc
         } catch (error) {
+            console.log("eer",error)
             return {err: error}
         }
     },

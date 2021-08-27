@@ -45,5 +45,19 @@ router.route('/')
     })
 
 
+router.route('/:id/nutrition')
+    .put(async (req,res)=>{
+        try {
+            let id = req.params.id
+            let data = {}
+            data.nutrition = req.body
+            let period = await PeriodController.updateOne(id,data)
+            if(period.err) return res.json({status: false, message: period.err})
+            res.json({status: true})
+        } catch (error) {
+            console.log("err",error)
+            res.json({status: false})
+        }
+    })
 
  module.exports = router

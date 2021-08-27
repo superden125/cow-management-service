@@ -90,25 +90,46 @@ const DiaryFeed = {
         
     },
     getMany: async (query)=>{
-        let {limit, skip, filter,sort} = query
-        let sortOption = {}
-        skip = skip ? parseInt(skip) : 0
+        try {
+            let {limit, skip, filter, sort, from, to} = query
+            let sortOption = {}
+            skip = skip ? parseInt(skip) : 0
 
-        limit = limit ?  parseInt(limit) : 10        
-        if(limit > 100) limit = 100
+            limit = limit ?  parseInt(limit) : 10        
+            if(limit > 100) limit = 100
 
-        filter = filter ? filter : {}
-        console.log(sort)
-        if(sort){
-            let s = sort.split(' ')[0]
-            let v = sort.split(' ')[1]
-            v = v == 'desc' ? -1 : 1            
-            sortOption[s]=v
+            filter = filter ? JSON.parse(filter) : {}        
+            if(!!from && !!to){
+                from = new Date(`${from} 00:00`).getTime()
+                to = new Date(`${to} 23:59`).getTime()            
+                Object.assign(filter, {createdAt: { $gt : from , $lt : to }})         
+            }
+            
+            if(filter.idUser){
+                let cows = await CowModel.getMany(999,0,{},{idUser:filter.idUser})
+                if(cows.length>0){
+                    let cowsId = []
+                    cows.forEach((cow)=>{
+                        cowsId.push(cow._id)
+                    })
+                    Object.assign(filter, {idCow: { $in: cowsId }})
+                }
+            }
+            
+            if(sort){
+                let s = sort.split(' ')[0]
+                let v = sort.split(' ')[1]
+                v = v == 'desc' ? -1 : 1            
+                sortOption[s]=v
+            }
+            delete filter.idUser
+            let items = await DiaryFeedModel.getMany(limit, skip, sortOption, filter)
+            let totalCount = await DiaryFeedModel.count(filter)
+            return {totalCount,items}
+        } catch (error) {
+            console.log("err",error)
+            return []
         }
-
-        let items = await DiaryFeedModel.getMany(limit, skip, sortOption, filter)
-        let totalCount = await DiaryFeedModel.count(filter)
-        return {totalCount,items}
     },
 
     count: (filter) =>{

@@ -28,12 +28,12 @@ router.route('/:id')
 router.route('/')
     .get(async (req,res)=>{
         try {
-            let query = req.query
-            query.limit = query.limit ? query.limit : query.take
-            delete query.take        
+            let query = req.query            
+            // query.limit = query.limit ? query.limit : query.take
+            // delete query.take        
             let diaryFeeds = await DiaryFeedController.getMany(query)
             res.json({status: true, data: diaryFeeds})
-        } catch (error) {
+        } catch (error) {            
             return res.json({status: false, data:[], message: "Error query data"})
         }
     })

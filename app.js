@@ -43,7 +43,7 @@ connectDB((err)=>{
     app.use('/api/cowbreed', require('./route/cowBreed'))
     app.use('/api/groupcow', require('./route/groupCow'))
     app.use('/api/food', require('./route/food'))
-    app.use('/api/diaryfeed',require('./route/diaryFedd'))
+    app.use('/api/diaryfeed',require('./route/diaryFeed'))
     app.use('/api/period',require('./route/period'))
     
     app.listen(port, ()=>{
