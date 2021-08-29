@@ -77,15 +77,15 @@ const CowBreed = {
 
             let items = await CowBreedModel.getMany(limit, skip, sortOption, filter, search)
             if(items.length > 0){
-                items.forEach( async (cowBreed)=>{
-                    let periods = await PeriodModel.getMany(100,0,{serial:1},{idCowBreed:cowBreed._id})                
+                for(let i=0; i<items.length; i++) {
+                    let periods = await PeriodModel.getMany(100,0,{serial:1},{idCowBreed:items[i]._id})
                     if(periods.length>0){
-                        cowBreed.periods = periods
+                        items[i].periods = periods
                     }
                     else{
-                        cowBreed.periods = []
+                        items[i].periods = []
                     }
-                })
+                }
             }
             let totalCount = await CowBreedModel.count(filter)
             return {totalCount,items}    

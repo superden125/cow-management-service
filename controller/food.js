@@ -75,11 +75,11 @@ const Food = {
 
         let items = await FoodModel.getMany(limit, skip, sortOption, filter, search)        
         if(items.length>0){
-            items.forEach(async (item)=>{
-                let area = await AreaModel.findOne(item.idArea)
+            for(let i=0; i<items.length; i++){
+                let area = await AreaModel.findOne(items[i].idArea)
                 if(area)
-                    item.areaName = area.name
-            })
+                    items[i].areaName = area.name
+            }
         }
         let totalCount = await FoodModel.count(filter)
         return {totalCount,items}
