@@ -30,8 +30,8 @@ router.route('/')
         try {
             let user = req.session.user
             let query = req.query
-            if(user.role!='admin'){
-                query.filter = query.filter ? query.filter : {}
+            query.filter = query.filter ? JSON.parse(query.filter): {}
+            if(user.role!='admin'){                 
                 query.filter.idArea = user.idArea
             }            
             // query.limit = query.limit ? query.limit : query.take

@@ -38,8 +38,9 @@ router.route('/getAllBreeder')
             let query = req.query
             // query.limit = query.limit ? query.limit : query.take
             // delete query.take
-            query.filter = query.filter ? query.filter: {}
-            query.filter.idManager = user._id            
+            query.filter = query.filter ? JSON.parse(query.filter): {}
+            query.filter.idManager = user._id
+            query.filter.role = 'breeder'         
             let users = await UserController.getMany(query)
             res.json({status: true, data: users})
         } catch (error) {

@@ -43,7 +43,8 @@ router.route('/')
     .post(isManager, async (req,res)=>{
         try {
             let data = req.body                                    
-            // let result = await CowBreedController.insertOne(data)        
+            // let result = await CowBreedController.insertOne(data)      
+            query.filter = query.filter ? JSON.parse(query.filter): {}   
             let result = await CowBreedController.insertCowBreedAndPeriods(data)        
             if(result.err) return res.json({status: false, message: result.err}) 
             return res.json({status: true, data: result})

@@ -97,8 +97,8 @@ const DiaryFeed = {
 
             limit = limit ?  parseInt(limit) : 10        
             if(limit > 100) limit = 100
-
-            filter = filter ? JSON.parse(filter) : {}        
+            console.log("filter",filter)
+            filter = filter ? filter : {}        
             if(!!from && !!to){
                 from = new Date(`${from} 00:00`).getTime()
                 to = new Date(`${to} 23:59`).getTime()            
@@ -113,7 +113,10 @@ const DiaryFeed = {
                         cowsId.push(cow._id)
                     })
                     Object.assign(filter, {idCow: { $in: cowsId }})
+                }else{
+                    return []
                 }
+                
             }
             
             if(sort){

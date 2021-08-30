@@ -91,7 +91,7 @@ const Cow = {
         if(limit > 100) limit = 100
 
         filter = filter ? filter : {}
-        console.log(sort)
+        
         if(sort){
             let s = sort.split(' ')[0]
             let v = sort.split(' ')[1]

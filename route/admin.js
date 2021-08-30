@@ -31,11 +31,13 @@ router.route('/user')
     .get(async (req,res)=>{
         try {            
             let query = req.query
-            query.limit = query.limit ? query.limit : query.take
-            delete query.take        
+            // query.limit = query.limit ? query.limit : query.take
+            // delete query.take      
+            query.filter = query.filter ? JSON.parse(query.filter): {}  
             let users = await UserController.getMany(query)
             res.json({status: true, data: users})
         } catch (error) {
+            console.log("err", error)
             return res.json({status: false, data:[], message: "Error query data"})
         }
     })

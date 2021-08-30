@@ -28,8 +28,9 @@ router.route('/')
     .get(async (req,res)=>{
         try {
             let query = req.query
-            query.limit = query.limit ? query.limit : query.take
-            delete query.take        
+            // query.limit = query.limit ? query.limit : query.take
+            // delete query.take       
+            query.filter = query.filter ? JSON.parse(query.filter): {}  
             let groupCows = await GroupCowController.getMany(query)
             res.json({status: true, data: groupCows})
         } catch (error) {

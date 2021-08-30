@@ -85,9 +85,9 @@ const User = {
 
         limit = limit ?  parseInt(limit) : 10        
         if(limit > 100) limit = 100
-
+        console.log("query", query)
         filter = filter ? filter : {}
-        console.log("filter",filter)
+        
         if(sort){
             let s = sort.split(' ')[0]
             let v = sort.split(' ')[1]
@@ -96,8 +96,7 @@ const User = {
         }
 
         let items = await UserModel.getMany(limit, skip, sortOption, filter, search)
-        let totalCount = await UserModel.count(filter)
-        console.log("tem",items)
+        let totalCount = await UserModel.count(filter)        
         return {totalCount,items}
     },
 

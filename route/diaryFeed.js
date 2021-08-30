@@ -31,6 +31,7 @@ router.route('/')
             let query = req.query            
             // query.limit = query.limit ? query.limit : query.take
             // delete query.take        
+            query.filter = query.filter ? JSON.parse(query.filter): {} 
             let diaryFeeds = await DiaryFeedController.getMany(query)
             res.json({status: true, data: diaryFeeds})
         } catch (error) {            
