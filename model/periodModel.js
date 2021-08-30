@@ -64,7 +64,7 @@ var PeriodModel = {
 
     queryByFields: async (filter)=>{
         try {            
-            filter.deleted = false        
+            filter.deleted = false                 
             let doc = await _collection.find(filter).toArray()            
             return doc
         } catch (error) {
@@ -74,7 +74,7 @@ var PeriodModel = {
 
     getMany: async (limit, skip, sort, filter)=>{
         try {            
-            filter.deleted = false        
+            filter.deleted = filter.deleted ? filter.deleted : false
             let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()            
             return doc
         } catch (error) {

@@ -139,6 +139,48 @@ const CowBreed = {
     deleteCowBreed: async(id)=>{
         await PeriodModel.removeMany({idCowBreed:id})
         return CowBreedModel.deleteOne(id)
+    },
+
+    getNutrition: async(id)=>{
+        try {
+            let result = []
+            let periods = await PeriodModel.queryByFields({idCowBreed: id})
+            if(periods.length==0) return []            
+            periods.forEach((period)=>{
+                result.push({
+                    _id: period._id,
+                    name : period.name,
+                    serial: period.serial,
+                    nutrition: period.nutrition ? period.nutrition : []
+                })
+            })
+            return result
+        } catch (error) {
+            console.log("eeer",error)
+            return {err: error}
+        }
+        
+    },
+
+    getFood: async(id)=>{
+        try {
+            let result = []
+            let periods = await PeriodModel.queryByFields({idCowBreed: id})
+            if(periods.length==0) return []            
+            periods.forEach((period)=>{
+                result.push({
+                    _id: period._id,
+                    name : period.name,
+                    serial: period.serial,
+                    foods: period.foods ? period.foods : []
+                })
+            })
+            return result
+        } catch (error) {
+            console.log("eeer",error)
+            return {err: error}
+        }
+        
     }
 }
 

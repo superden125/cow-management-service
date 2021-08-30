@@ -5,6 +5,35 @@ const {isManager} = require('../middleware/auth')
 
 const router = express.Router()
 
+
+router.route('/:id/nutrition')
+    .get(async (req,res)=>{
+        try {            
+            let id = req.params.id
+            let nutrition = await CowBreedController.getNutrition(id)          
+            if(nutrition.err) return res.json({status: false, message: "error get data"})
+            res.json({status: true, data: nutrition})
+        } catch (error) {
+            console.log("eer",error)
+            return {status: false, message: "error get data"}
+        }
+        
+    })
+
+router.route('/:id/food')
+.get(async (req,res)=>{
+    try {            
+        let id = req.params.id
+        let food = await CowBreedController.getFood(id)         
+        if(food.err) return res.json({status: false, message: "error get data"})
+        res.json({status: true, data: food})
+    } catch (error) {
+        console.log("eer",error)
+        return {status: false, message: "error get data"}
+    }
+    
+})
+
 router.route('/:id')
     .get(async (req,res)=>{
         let id = req.params.id

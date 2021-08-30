@@ -1,8 +1,10 @@
 "use strict";
+const dates = require('../lib/date')
 const CowModel = require('../model/cowModel')
 const UserModel = require('../model/userModel')
-const CowBreed = require('../model/cowBreedModel')
-const GroupCow = require('../model/groupCowModel')
+const CowBreedModel = require('../model/cowBreedModel')
+const GroupCowModel = require('../model/groupCowModel')
+const PeriodModel = require('../model/periodModel')
 
 const Cow = {
     insertOne: async (data)=>{
@@ -22,7 +24,7 @@ const Cow = {
 
             //check group cow
             if(data.idGroupCow){
-                let groupCow = await GroupCow.findOne(data.idGroupCow)
+                let groupCow = await GroupCowModel.findOne(data.idGroupCow)
                 if(!groupCow) return {err: "group cow not found"}
             }
 
@@ -42,9 +44,26 @@ const Cow = {
     },
     findById: async (id)=>{
         try {
-            let cow = await CowModel.findOne(id)            
+            let cow = await CowModel.findOne(id)
+            if(cow){                
+                let cowBreed = await CowBreedModel.findOne(cow.idCowBreed)
+                cow.cowBreedName = cowBreed.name
+                if(cow.idGroupCow){
+                    let groupCow = await GroupCowModel.findOne(cow.idGroupCow)
+                    cow.groupCowName = groupCow.name
+                }
+                cow.daysOld = dates.getDaysOld(cow.birthday)
+                let currentPeriod = await PeriodModel.getMany(1,0,{endDay:1},{idCowBreed: cow.idCowBreed,startDay: {$gte: cow.daysOld}})
+                
+                if(currentPeriod[0]){
+                    console.log("current period", currentPeriod)
+                    cow.currentPeriodId = currentPeriod[0]._id
+                    cow.currentPeriodName = currentPeriod[0].name
+                }                    
+            }
             return cow
         } catch (error) {
+            console.log("eer",error)
             return {err: error}
         }
     },
@@ -65,7 +84,7 @@ const Cow = {
             }
             
             if(data.idGroupCow){
-                let groupCow = await GroupCow.findOne(data.idGroupCow)
+                let groupCow = await GroupCowModel.findOne(data.idGroupCow)
                 if(!groupCow) return {err: "group cow not found"}
             }
             if(data.birthday){

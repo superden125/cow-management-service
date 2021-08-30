@@ -38,11 +38,10 @@ router.route('/')
         }
     })
     .post(async (req,res)=>{
-        let data = req.body                                    
+        let data = req.body               
         let result = await GroupCowController.insertOne(data)        
         if(result.err) return res.json({status: false}) 
         return res.json({status: true, data: result})
-
     })
 
 
