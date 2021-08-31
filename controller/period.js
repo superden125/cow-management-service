@@ -127,8 +127,10 @@ const Period = {
 
                     if(!data.foods[i].idFood) return {err: `idFood null at ${i}`}
                     if(!data.foods[i].amount) return {err: `amount null at ${i}`}
-                    data.foods[i].amount = parseInt(data.foods[i].amount)                    
-                    if(Number.isInteger(data.foods[i].amount)==false || data.foods[i].amount <= 0)
+                    data.foods[i].amount = parseFloat(data.foods[i].amount)                    
+                    // if(Number.isInteger(data.foods[i].amount)==false || data.foods[i].amount <= 0)
+                    //     return {err: `amount must > 0 at ${i}`}
+                    if(isNaN(data.foods[i].amount) || data.foods[i].amount <= 0)
                         return {err: `amount must > 0 at ${i}`}
                         
                     let food = await FoodModel.findOne(data.foods[i].idFood)
@@ -169,7 +171,53 @@ const Period = {
 
     count: (filter) =>{
         PeriodModel.count(filter)
-    }    
+    },
+
+    deleteFood: async (idPeriod, idFood)=>{
+        try {
+            let result = await PeriodModel.removeItem(idPeriod, {foods:{idFood}})            
+            return result
+        }catch (error) {
+            return {err: error}
+        }
+    },
+    updateFood: async (idPeriod, idFood, data)=>{
+        try {
+            let filter = {_id: idPeriod, "foods.idFood": idFood}
+            let newData = {"foods.$.amount": data.amount}
+            console.log("filter - data", filter, data)
+            let result = await PeriodModel.updateItem(filter, newData)            
+            return result
+        } catch (error) {
+            return {err: error}
+        }
+    },
+    pushFood: async (_id, data)=>{
+        try {
+            //check foods
+            if(Array.isArray(data)==true){
+                let i = 0
+                while(i<data.length){
+
+                    if(!data[i].idFood) return {err: `idFood null at ${i}`}
+                    if(!data[i].amount) return {err: `amount null at ${i}`}
+                    data[i].amount = parseFloat(data[i].amount)                                   
+                    if(isNaN(data[i].amount) || data[i].amount <= 0)
+                        return {err: `amount must > 0 at ${i}`}
+                        
+                    let food = await FoodModel.findOne(data[i].idFood)
+                    if(!food) return {err: `food not found at ${i}`}
+                    i++
+                }
+            }
+
+            let result = await PeriodModel.pushItem(_id, {foods: { $each: data}})
+            console.log("result", result)
+            return result
+        } catch (error) {
+            return {err: error}
+        }
+    }
 }
 
 module.exports = Period;
