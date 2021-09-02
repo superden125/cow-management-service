@@ -90,6 +90,35 @@ var CowModel = {
         }catch(error){
             return error
         }
+    },
+    removeItem: async (_id, data)=>{
+        try {            
+            let doc = await _collection
+                .updateOne({_id}, {$pull: data}, {returnOriginal: false})
+            return doc.modifiedCount
+        } catch (error) {
+            console.log("err",error)
+            return {err: error}
+        }
+    },
+    updateItem: async (filter, data)=>{
+        try {
+            let doc = await _collection
+                .updateOne(filter, {$set: data}, {returnOriginal: false})
+            return doc.modifiedCount
+        } catch (error) {
+            console.log("err",error)
+            return {err: error}
+        }
+    },
+    pushItem: async (_id, data)=>{
+        try {            
+            let doc = await _collection
+                .updateMany({_id},{$push: data})
+            return doc
+        } catch (error) {
+            return {err: error}
+        }
     }
 }
 

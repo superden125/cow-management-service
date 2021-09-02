@@ -125,7 +125,37 @@ const Cow = {
 
     count: (filter) =>{
         CowModel.count(filter)
-    }    
+    },
+
+    deleteWeight: async (idCow, week)=>{
+        try {
+            let result = await CowModel.removeItem(idCow, {weight:{week}})            
+            return result
+        }catch (error) {
+            return {err: error}
+        }
+    },
+    updateWeight: async (idCow, week, data)=>{
+        try {
+            let filter = {_id: idCow, "weight.week": week}
+            let newData = {"weight.$.weight": data.weight}
+            console.log("filter - data", filter, data)
+            let result = await CowModel.updateItem(filter, newData)
+            return result
+        } catch (error) {
+            return {err: error}
+        }
+    },
+    pushWeight: async (_id, data)=>{
+        try {
+            data.map(item => item.createdAt = new Date().getTime())
+            let result = await CowModel.pushItem(_id, {weight: { $each: data, $sort: {week: 1} }})
+            console.log("result", result)
+            return result
+        } catch (error) {
+            return {err: error}
+        }
+    }
 }
 
 module.exports = Cow;

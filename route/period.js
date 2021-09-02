@@ -64,7 +64,7 @@ router.route('/:id/nutrition')
 router.route('/:idPeriod/food/:idFood')
     .put(async (req,res)=>{
         let {idPeriod, idFood} = req.params
-        let {amount} = req.body        
+        let {amount} = req.body
         if(!amount) return res.json({status: false, message: "amount invalid"})
         
         let result = await PeriodController.updateFood(idPeriod,idFood, {amount})

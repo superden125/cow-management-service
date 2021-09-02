@@ -1,5 +1,6 @@
 const express = require('express')
 const CowController = require('../controller/cow')
+const CowModel = require('../model/cowModel')
 
 
 const router = express.Router()    
@@ -22,6 +23,38 @@ router.route('/:id')
         let id = req.params.id
         let cow = await CowController.deleteById(id)
         if(!cow) return res.json({status: false, message: "cow not found"})
+        res.json({status: true})
+    })
+
+router.route('/:idCow/weight/:week')
+    .put(async (req,res)=>{
+        let {idCow, week} = req.params
+        let {weight} = req.body
+        if(!weight) return res.json({status: false, message: "weight invalid"})
+        
+        let result = await CowController.updateWeight(idCow,week, {weight})
+        if(!result || result.err) return res.json({status: false})
+        res.json({status: true})
+    })
+    .delete(async (req,res)=>{
+        let {idCow, week} = req.params
+        let result = await CowController.deleteWeight(idCow,week)
+        if(!result || result.err) return res.json({status: false})
+        res.json({status: true})
+    })
+
+router.route('/:idCow/weight')
+    .get(async (req,res)=>{
+        let {idCow} = req.params
+        let result = await CowModel.findOne(idCow)
+        if(!result) return res.json({status: false, message: "cow not found"})        
+        res.json({status: true, data: result.weight})
+    })
+    .post(async (req,res)=>{
+        let {idCow} = req.params
+        let data = req.body
+        let result = await CowController.pushWeight(idCow, data)
+        if(!result || result.err) return res.json({status: false})
         res.json({status: true})
     })
 
