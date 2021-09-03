@@ -1,4 +1,5 @@
 "use strict";
+const shortid = require('shortid')
 const FoodModel = require('../model/foodModel')
 const AreaModel = require('../model/areaModel')
 const Food = {
@@ -87,7 +88,36 @@ const Food = {
 
     count: (filter) =>{
         FoodModel.count(filter)
-    }    
+    },
+
+    deleteIngredient: async (idFood, idIngredient)=>{
+        try {
+            let result = await FoodModel.removeItem(idFood, {ingredient:{idIngredient}})            
+            return result
+        }catch (error) {
+            return {err: error}
+        }
+    },
+    updateIngredient: async (idFood, idIngredient, data)=>{
+        try {
+            let filter = {_id: idFood, "ingredient.idIngredient": idIngredient}            
+            data.idIngredient = idIngredient
+            let newData = {"ingredient.$": data}            
+            let result = await FoodModel.updateItem(filter, newData)                        
+            return result
+        } catch (error) {            
+            return {err: error}
+        }
+    },
+    pushIngredient: async (_id, data)=>{
+        try {           
+            data.map(item => item.idIngredient = shortid.generate()) 
+            let result = await FoodModel.pushItem(_id, {ingredient: { $each: data}})            
+            return result
+        } catch (error) {
+            return {err: error}
+        }
+    }
 }
 
 module.exports = Food;

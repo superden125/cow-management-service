@@ -56,4 +56,31 @@ router.route('/')
 
     })
 
+router.route('/:idFood/ingredient/:idIngredient')
+    .put(isManager, async (req,res)=>{
+        let {idFood, idIngredient} = req.params
+        let data = req.body
+        // if(!data.amount) return res.json({status: false, message: "amount invalid"})
+        
+        let result = await FoodController.updateIngredient(idFood,idIngredient, data)
+        if(!result || result.err) return res.json({status: false})
+        res.json({status: true})
+    })
+    .delete(isManager, async (req,res)=>{
+        let {idFood, idIngredient} = req.params
+        let result = await FoodController.deleteIngredient(idFood,idIngredient)
+        if(!result || result.err) return res.json({status: false})
+        res.json({status: true})
+    })
+
+router.route('/:idFood/ingredient')
+    .post(isManager, async (req,res)=>{
+        let {idFood} = req.params
+        let data = req.body
+
+        let result = await FoodController.pushIngredient(idFood, data)
+        if(!result || result.err) return res.json({status: false})
+        res.json({status: true})
+    })
+
  module.exports = router

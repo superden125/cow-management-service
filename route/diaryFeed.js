@@ -46,6 +46,31 @@ router.route('/')
 
     })
 
+router.route('/:idDiaryFeed/food/:idFood')
+    .put(async (req,res)=>{
+        let {idDiaryFeed, idFood} = req.params
+        let {amount} = req.body
+        if(!amount) return res.json({status: false, message: "amount invalid"})
+        
+        let result = await DiaryFeedController.updateFood(idDiaryFeed,idFood, {amount})
+        if(!result || result.err) return res.json({status: false})
+        res.json({status: true})
+    })
+    .delete(async (req,res)=>{
+        let {idDiaryFeed, idFood} = req.params
+        let result = await DiaryFeedController.deleteFood(idDiaryFeed,idFood)
+        if(!result || result.err) return res.json({status: false})
+        res.json({status: true})
+    })
 
+router.route('/:idDairyFeed/food')
+    .post(async (req,res)=>{
+        let {idDairyFeed} = req.params
+        let data = req.body
+
+        let result = await DiaryFeedController.pushFood(idDairyFeed, data)
+        if(!result || result.err) return res.json({status: false})
+        res.json({status: true})
+    })
 
  module.exports = router

@@ -45,7 +45,7 @@ router.route('/')
         return res.json({status: true, data: result})
     })
 
-
+//chua lam nutrition
 router.route('/:id/nutrition')
     .put(async (req,res)=>{
         try {
@@ -59,6 +59,21 @@ router.route('/:id/nutrition')
             console.log("err",error)
             res.json({status: false})
         }
+    })
+    .delete(async (req,res)=>{
+        let {idPeriod, idNutrition} = req.params
+        let result = await PeriodController.deleteFood(idPeriod,idFood)
+        if(!result || result.err) return res.json({status: false})
+        res.json({status: true})
+    })
+
+router.route('/:idPeriod/nutrition')
+    .post(async (req,res)=>{
+        let {idPeriod} = req.params
+        let data = req.body
+        let result = await PeriodController.pushFood(idPeriod, data)
+        if(!result || result.err) return res.json({status: false})
+        res.json({status: true})
     })
 
 router.route('/:idPeriod/food/:idFood')
