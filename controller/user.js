@@ -84,8 +84,7 @@ const User = {
         skip = skip ? parseInt(skip) : 0
 
         limit = limit ?  parseInt(limit) : 10        
-        if(limit > 100) limit = 100
-        console.log("query", query)
+        if(limit > 100) limit = 100        
         filter = filter ? filter : {}
         
         if(sort){

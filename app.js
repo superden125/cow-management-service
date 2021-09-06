@@ -4,12 +4,13 @@ import express from 'express'
 import session from 'express-session'
 import bodyParser from 'body-parser'
 import cors  from 'cors'
+import morgan from 'morgan'
 import {connectDB} from './model/index'
 import {port} from './config/host'
 import {isLogin} from './middleware/auth'
 
 const app = express()
-
+app.use(morgan('dev'))
 app.use(session(
     {
         secret: "DC4483AB18723",

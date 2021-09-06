@@ -1,5 +1,5 @@
 "use strict";
-const dates = require('../lib/date')
+const dateUtil = require('../lib/date')
 const CowModel = require('../model/cowModel')
 const UserModel = require('../model/userModel')
 const CowBreedModel = require('../model/cowBreedModel')
@@ -19,7 +19,7 @@ const Cow = {
             if(!user) return {err: "user not found"}            
 
             //check cowBreed
-            let cowBreed = await CowBreed.findOne(data.idCowBreed)
+            let cowBreed = await CowBreedModel.findOne(data.idCowBreed)
             if(!cowBreed) return {err: "cow breed not found"}
 
             //check group cow
@@ -28,7 +28,8 @@ const Cow = {
                 if(!groupCow) return {err: "group cow not found"}
             }
 
-            data.birthday = parseInt(data.birthday)
+            // data.birthday = parseInt(data.birthday)
+            data.birthday = new Date(data.birthday).getTime()
             if(Number.isInteger(data.birthday)==false)
                 return {err: "birthday invalid"}            
 
@@ -39,31 +40,36 @@ const Cow = {
                 return {err: cow}
             }
         } catch (error) {
+            console.log("error insert cow", error)
             return {err: error}
         }
     },
     findById: async (id)=>{
         try {
             let cow = await CowModel.findOne(id)
-            if(cow){                
+            if(cow){
+                //get cow breed            
                 let cowBreed = await CowBreedModel.findOne(cow.idCowBreed)
                 cow.cowBreedName = cowBreed.name
+
+                //get group cow
                 if(cow.idGroupCow){
                     let groupCow = await GroupCowModel.findOne(cow.idGroupCow)
                     cow.groupCowName = groupCow.name
                 }
-                cow.daysOld = dates.getDaysOld(cow.birthday)
+
+                //get current period
+                cow.daysOld = dateUtil.getDaysOld(cow.birthday)
                 let currentPeriod = await PeriodModel.getMany(1,0,{endDay:1},{idCowBreed: cow.idCowBreed,startDay: {$gte: cow.daysOld}})
                 
-                if(currentPeriod[0]){
-                    console.log("current period", currentPeriod)
+                if(currentPeriod[0]){                    
                     cow.currentPeriodId = currentPeriod[0]._id
                     cow.currentPeriodName = currentPeriod[0].name
                 }                    
             }
             return cow
         } catch (error) {
-            console.log("eer",error)
+            console.log("find cow",error)
             return {err: error}
         }
     },
@@ -97,52 +103,93 @@ const Cow = {
             if(!cow) return {err: "update false"}
             return true
         } catch (error) {
+            console.log("error update cow", error)
             return {err: error}
         }
         
     },
     getMany: async (query)=>{
-        let {limit, skip, filter,sort} = query
-        let sortOption = {}
-        skip = skip ? parseInt(skip) : 0
+        try {
+            let {limit, skip, filter,sort} = query
+            let sortOption = {}
+            skip = skip ? parseInt(skip) : 0
 
-        limit = limit ?  parseInt(limit) : 10        
-        if(limit > 100) limit = 100
+            limit = limit ?  parseInt(limit) : 10        
+            if(limit > 100) limit = 100
 
-        filter = filter ? filter : {}
-        
-        if(sort){
-            let s = sort.split(' ')[0]
-            let v = sort.split(' ')[1]
-            v = v == 'desc' ? -1 : 1            
-            sortOption[s]=v
-        }
+            filter = filter ? filter : {}
+            
+            if(sort){
+                let s = sort.split(' ')[0]
+                let v = sort.split(' ')[1]
+                v = v == 'desc' ? -1 : 1            
+                sortOption[s]=v
+            }
 
-        let items = await CowModel.getMany(limit, skip, sortOption, filter)
-        if(items.length > 0){
-            for(let i = 0; i < items.length; i++){
-                let cow = items[i]
-                if(cow){                
-                    let cowBreed = await CowBreedModel.findOne(cow.idCowBreed)
-                    cow.cowBreedName = cowBreed.name
-                    if(cow.idGroupCow){
-                        let groupCow = await GroupCowModel.findOne(cow.idGroupCow)
-                        cow.groupCowName = groupCow.name
+            let cacheGroupCowList = []
+            let cacheCowBreedList = []
+            let cachePeriodList = []
+            let items = await CowModel.getMany(limit, skip, sortOption, filter)
+            if(items.length > 0){
+                for(let i = 0; i < items.length; i++){
+                    let cow = items[i]
+                    if(cow){
+
+                        //get cow breed name
+                        let cacheCowBreed = cacheCowBreedList.find(x => x.id == cow.idCowBreed)
+                        if(cacheCowBreed){
+                            cow.cowBreedName = cacheCowBreed.name
+                        }else{
+                            let cowBreed = await CowBreedModel.findOne(cow.idCowBreed)
+                            cow.cowBreedName = cowBreed.name
+                            cacheCowBreedList.push({id: cowBreed._id, name: cowBreed.name})
+                        }                        
+
+                        //get cow group name                        
+                        if(cow.idGroupCow){
+                            let cacheGroupCow = cacheGroupCowList.find(x => x.id == cow.idGroupCow)
+                            if(cacheGroupCow){
+                                cow.groupCowName = cacheGroupCow.name
+                            }else{
+                                let groupCow = await GroupCowModel.findOne(cow.idGroupCow)
+                                cow.groupCowName = groupCow.name
+                                cacheGroupCowList.push({id: groupCow._id, name: groupCow.name})
+                            }
+                            
+                        }
+
+                        //format date
+                        cow.daysOld = dateUtil.getDaysOld(cow.birthday)
+                        cow.birthday = dateUtil.formatDate(cow.birthday)
+
+                        //get current period
+                        let cachePeriod = cachePeriodList.find(x=> x.startDay <= cow.daysOld && x.endDay >= cow.daysOld)
+                        if(cachePeriod){
+                            cow.currentPeriodId = cachePeriod.id
+                            cow.currentPeriodName = cachePeriod.name
+                        }else{
+                            let currentPeriod = await PeriodModel.getMany(1,0,{endDay:1},{idCowBreed: cow.idCowBreed,startDay: {$gte: cow.daysOld}})                        
+                            if(currentPeriod[0]){
+                                cow.currentPeriodId = currentPeriod[0]._id
+                                cow.currentPeriodName = currentPeriod[0].name
+                                cachePeriodList.push({
+                                    id: currentPeriod[0]._id,
+                                    name: currentPeriod[0].name,
+                                    startDay: currentPeriod[0].startDay,
+                                    endDay: currentPeriod[0].endDay,
+                                })
+                            }
+                        }                        
                     }
-                    cow.daysOld = dates.getDaysOld(cow.birthday)
-                    let currentPeriod = await PeriodModel.getMany(1,0,{endDay:1},{idCowBreed: cow.idCowBreed,startDay: {$gte: cow.daysOld}})
-                    
-                    if(currentPeriod[0]){
-                        console.log("current period", currentPeriod)
-                        cow.currentPeriodId = currentPeriod[0]._id
-                        cow.currentPeriodName = currentPeriod[0].name
-                    }                    
                 }
             }
-        }
 
-        let totalCount = await CowModel.count(filter)
-        return {totalCount,items}
+            let totalCount = await CowModel.count(filter)
+            return {totalCount,items}
+        } catch (error) {
+            console.log("error get many cow", error)
+            return {err: error}
+        }
     },
 
     count: (filter) =>{

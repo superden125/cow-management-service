@@ -76,10 +76,19 @@ const Food = {
 
         let items = await FoodModel.getMany(limit, skip, sortOption, filter, search)        
         if(items.length>0){
+            let cacheAreaList = []            
             for(let i=0; i<items.length; i++){
-                let area = await AreaModel.findOne(items[i].idArea)
-                if(area)
-                    items[i].areaName = area.name
+                let cacheArea = cacheAreaList.find(x=> x.id == items[i].idArea)
+                if(cacheArea){
+                    items[i].areaName = cacheArea.name
+                }else{
+                    let area = await AreaModel.findOne(items[i].idArea)
+                    if(area){
+                        items[i].areaName = area.name
+                        cacheAreaList.push({ id: area._id, name: area.name})
+                    }                        
+                }
+                
             }
         }
         let totalCount = await FoodModel.count(filter)
