@@ -145,7 +145,7 @@ const DiaryFeed = {
             return {totalCount,items}
         } catch (error) {
             console.log("err",error)
-            return []
+            return {err: error}
         }
     },
 

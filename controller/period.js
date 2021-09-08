@@ -148,25 +148,29 @@ const Period = {
         
     },
     getMany: async (query)=>{
-        let {limit, skip, filter,sort} = query
-        let sortOption = {}
-        skip = skip ? parseInt(skip) : 0
+        try {
+            let {limit, skip, filter,sort} = query
+            let sortOption = {}
+            skip = skip ? parseInt(skip) : 0
 
-        limit = limit ?  parseInt(limit) : 10        
-        if(limit > 100) limit = 100
+            limit = limit ?  parseInt(limit) : 10        
+            if(limit > 100) limit = 100
 
-        filter = filter ? filter : {}
-        
-        if(sort){
-            let s = sort.split(' ')[0]
-            let v = sort.split(' ')[1]
-            v = v == 'desc' ? -1 : 1            
-            sortOption[s]=v
+            filter = filter ? filter : {}
+            
+            if(sort){
+                let s = sort.split(' ')[0]
+                let v = sort.split(' ')[1]
+                v = v == 'desc' ? -1 : 1            
+                sortOption[s]=v
+            }
+
+            let items = await PeriodModel.getMany(limit, skip, sortOption, filter)
+            let totalCount = await PeriodModel.count(filter)
+            return {totalCount,items}
+        } catch (error) {
+            return {err: error}
         }
-
-        let items = await PeriodModel.getMany(limit, skip, sortOption, filter)
-        let totalCount = await PeriodModel.count(filter)
-        return {totalCount,items}
     },
 
     count: (filter) =>{

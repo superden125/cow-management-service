@@ -156,7 +156,7 @@ const CowBreed = {
             })
             return result
         } catch (error) {
-            console.log("eeer",error)
+            console.log("err cowBreed getNutrition",error)
             return {err: error}
         }
         
@@ -177,7 +177,7 @@ const CowBreed = {
             })
             return result
         } catch (error) {
-            console.log("eeer",error)
+            console.log("err cowBreed getFood",error)
             return {err: error}
         }
         

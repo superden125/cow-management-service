@@ -7,40 +7,35 @@ router.route('/:id')
     .get(async (req,res)=>{
         let id = req.params.id
         let groupCow = await GroupCowController.findById(id)        
-        if(!groupCow) return res.json({status: false, message: "groupCow not found"})            
+        if(!groupCow) return res.status(400).json({status: false, message: "groupCow not found"})            
         res.json({status: true, data: groupCow})
     })
     .put(async (req,res)=>{
         let id = req.params.id
         let data = req.body
         let groupCow = await GroupCowController.updateOne(id,data)
-        if(groupCow.err) return res.json({status: false, message: groupCow.err})
+        if(groupCow.err) return res.status(400).json({status: false, message: groupCow.err})
         res.json({status: true})
     })
     .delete(async (req,res)=>{
         let id = req.params.id
         let groupCow = await GroupCowController.deleteById(id)
-        if(!groupCow) return res.json({status: false, message: "groupCow not found"})
+        if(!groupCow) return res.status(400).json({status: false, message: "groupCow not found"})
         res.json({status: true})
     })
 
 router.route('/')
-    .get(async (req,res)=>{
-        try {
-            let query = req.query
-            // query.limit = query.limit ? query.limit : query.take
-            // delete query.take       
-            query.filter = query.filter ? JSON.parse(query.filter): {}  
-            let groupCows = await GroupCowController.getMany(query)
-            res.json({status: true, data: groupCows})
-        } catch (error) {
-            return res.json({status: false, data:[], message: "Error query data"})
-        }
+    .get(async (req,res)=>{        
+        let query = req.query    
+        query.filter = query.filter ? JSON.parse(query.filter): {}  
+        let groupCows = await GroupCowController.getMany(query)
+        if(groupCows.err) return res.status(400).json({status: false, message: groupCows.err})        
+        res.json({status: true, data: groupCows})        
     })
     .post(async (req,res)=>{
         let data = req.body               
         let result = await GroupCowController.insertOne(data)        
-        if(result.err) return res.json({status: false}) 
+        if(result.err) return res.status(400).json({status: false}) 
         return res.json({status: true, data: result})
     })
 
