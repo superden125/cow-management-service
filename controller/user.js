@@ -18,8 +18,17 @@ const User = {
             let area = await AreaModel.findOne(data.idArea)
             if(!area) return {err: "id area not found"}
 
-            // let checkUser = await UserModel.queryByFields({username: data.username})
-            // if(checkUser)
+            //check idManager
+            if(data.idManager){
+                let checkManager = await UserModel.findOne(data.idManager)
+                if(!checkManager) return {err: "id Manager not found"}
+            }
+
+            //check username existed
+            let checkUser = await UserModel.queryByFields({username: data.username})
+            if(checkUser.length > 0){
+                return {err: "username existed"}
+            }
 
             data.password = pwd.hash(data.password)
             let user = await UserModel.insertOne(data)
@@ -66,7 +75,14 @@ const User = {
             if(data.idArea){
                 let area = await AreaModel.findOne(data.idArea)
                 if(!area) return {err: "id area not found"}
-            }            
+            }
+            
+            //check idManager
+            if(data.idManager){
+                let checkManager = await UserModel.findOne(data.idManager)
+                if(!checkManager) return {err: "id Manager not found"}
+            }
+            
             delete data.password
             delete data.username
             let user = await UserModel.updateOne(id,data)

@@ -16,7 +16,7 @@ const Cow = {
             
             //check user
             let user = await UserModel.findOne(data.idUser)
-            if(!user) return {err: "user not found"}            
+            if(!user) return {err: "user not found"}
 
             //check cowBreed
             let cowBreed = await CowBreedModel.findOne(data.idCowBreed)

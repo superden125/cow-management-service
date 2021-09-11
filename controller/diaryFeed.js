@@ -2,6 +2,7 @@
 const DiaryFeedModel = require('../model/diaryFeedModel')
 const CowModel = require('../model/cowModel')
 const FoodModel = require('../model/foodModel')
+const UserModel = require('../model/userModel')
 
 const DiaryFeed = {
     insertOne: async (data)=>{
@@ -30,7 +31,11 @@ const DiaryFeed = {
                 if(!food) return {err: `food not found at ${i}`}
 
                 i++
-            }            
+            }
+
+            //check dairy food correct here
+            // waiting
+            //
 
             //insert db
             let diaryFeed = await DiaryFeedModel.insertOne(data)
@@ -104,8 +109,27 @@ const DiaryFeed = {
                 to = new Date(`${to} 23:59`).getTime()            
                 Object.assign(filter, {createdAt: { $gt : from , $lt : to }})         
             }
+
+            if(filter.idManager){
+                // let cows = await CowModel.getMany(999,0,{},{idUser:filter.idUser})
+                let users = await UserModel.getMany({idManager: filter.idManager})
+                if(users.length > 0){
+                    for(let i=0; i<users.length; i++){
+                        let cows = await CowModel.queryByFields({idUser:users[i]})
+                        if(cows.length>0){
+                            let cowsId = []
+                            cows.forEach((cow)=>{
+                                cowsId.push(cow._id)
+                            })
+                            Object.assign(filter, {idCow: { $in: cowsId }})
+                        }else{
+                            return []
+                        }
+                    }                    
+                }                
+            }
             
-            if(filter.idUser){
+            if(!filter.idManager && filter.idUser){
                 // let cows = await CowModel.getMany(999,0,{},{idUser:filter.idUser})
                 let cows = await CowModel.queryByFields({idUser:filter.idUser})
                 if(cows.length>0){
@@ -127,7 +151,7 @@ const DiaryFeed = {
                 sortOption[s]=v
             }
             delete filter.idUser
-
+            delete filter.idManager
             let items = await DiaryFeedModel.getMany(limit, skip, sortOption, filter)            
             if(items.length>0){
                 for(let i=0; i<items.length; i++){                    

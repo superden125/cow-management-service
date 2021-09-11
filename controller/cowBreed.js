@@ -1,6 +1,7 @@
 "use strict";
 const CowBreedModel = require('../model/cowBreedModel')
 const PeriodModel = require('../model/periodModel')
+const PeriodController = require('./period')
 
 const CowBreed = {
     insertOne: async (data)=>{
@@ -101,6 +102,10 @@ const CowBreed = {
     
     insertCowBreedAndPeriods: async(data)=>{
         try {
+            if(!data.name) return {err: "name not null"}
+            if(!data.farmingTime || !Number.isInteger(parseInt(farmingTime)))
+                return {err: "farmingTime invalid"}
+
             let periods = data.periods
             delete data.periods
             let cowBreed = await CowBreedModel.insertOne(data)
@@ -108,7 +113,9 @@ const CowBreed = {
             if(periods.length > 0){
                 for(let i = 0; i < periods.length; i++){
                     periods[i].idCowBreed = cowBreed.insertedId
-                    await PeriodModel.insertOne(periods[i])
+                    // await PeriodModel.insertOne(periods[i])
+                    let period =  await PeriodController.insertOne(periods[i])
+                    if(period.err) return {err: period.err}
                 }
             }
             return data
@@ -119,6 +126,10 @@ const CowBreed = {
 
     updateCowBreedAndPeriods: async(id, data)=>{
         try {
+
+            if(data.farmingTime && !Number.isInteger(parseInt(farmingTime)))
+                return {err: "farmingTime invalid"}
+
             let periods = data.periods
             delete data.periods
             let cowBreed = await CowBreedModel.updateOne(id,data)
@@ -126,7 +137,8 @@ const CowBreed = {
             if(periods.length > 0){
                 for(let i = 0; i < periods.length; i++){   
                     delete periods[i].idCowBreed
-                    let period = await PeriodModel.updateOne(periods[i]._id,periods[i])
+                    // let period = await PeriodModel.updateOne(periods[i]._id,periods[i])
+                    let period = await PeriodController.updateOne(periods[i]._id, periods[i])
                     if(!period) return {err: "update period fail"}
                 }
             }
