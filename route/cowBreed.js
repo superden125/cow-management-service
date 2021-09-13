@@ -46,9 +46,10 @@ router.route('/:id')
 
 router.route('/')
     .get(async (req,res)=>{        
-        let query = req.query        
+        let query = req.query
+        query.filter = query.filter ? JSON.parse(query.filter): {} 
         let cowBreeds = await CowBreedController.getMany(query)
-        if(cowBreeds.err) return res.status.json({status: false, message: cowBreeds.err})
+        if(cowBreeds.err) return res.status(400).json({status: false, message: cowBreeds.err})
         res.json({status: true, data: cowBreeds})        
     })
     .post(isManager, async (req,res)=>{        

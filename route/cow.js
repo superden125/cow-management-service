@@ -6,7 +6,7 @@ const CowModel = require('../model/cowModel')
 const router = express.Router()    
 
 router.route('/:id')
-    .get(async (req,res)=>{
+    .get(async (req,res)=>{        
         let id = req.params.id
         let cow = await CowController.findById(id)        
         if(!cow) return res.status(400).json({status: false, message: "cow not found"})            

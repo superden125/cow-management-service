@@ -124,8 +124,7 @@ const Cow = {
                 let v = sort.split(' ')[1]
                 v = v == 'desc' ? -1 : 1            
                 sortOption[s]=v
-            }
-
+            }            
             let cacheGroupCowList = []
             let cacheCowBreedList = []
             let cachePeriodList = []

@@ -1,6 +1,7 @@
 "use strict";
 const CowBreedModel = require('../model/cowBreedModel')
 const PeriodModel = require('../model/periodModel')
+const CowModel = require('../model/cowModel')
 const PeriodController = require('./period')
 
 const CowBreed = {
@@ -75,7 +76,29 @@ const CowBreed = {
                 v = v == 'desc' ? -1 : 1            
                 sortOption[s]=v
             }
+            
+            //get all cow by idUser            
+            if(filter.idUser || filter.idGroupCow){
+                let query = {}
+                if(filter.idUser) query.idUser = filter.idUser
+                if(filter.idGroupCow) query.idGroupCow = filter.idGroupCow                
+                let cows = await CowModel.queryByFields(query)
+                console.log("cow", cows)
+                if(cows.length>0){
+                    let cowsBreedId = []
+                    cows.forEach((cow)=>{
+                        if(cowsBreedId.findIndex(x=>x == cow.idCowBreed) == -1)
+                            cowsBreedId.push(cow.idCowBreed)
+                    })
+                    Object.assign(filter, {_id: { $in: cowsBreedId }})
+                }else{
+                    return []
+                }
+            }            
 
+            delete filter.idUser
+            delete filter.idGroupCow
+            
             let items = await CowBreedModel.getMany(limit, skip, sortOption, filter, search)
             if(items.length > 0){
                 for(let i=0; i<items.length; i++) {
@@ -87,9 +110,12 @@ const CowBreed = {
                         items[i].periods = []
                     }
                 }
+            } else{
+                items = []
             }
             let totalCount = await CowBreedModel.count(filter)
-            return {totalCount,items}    
+            totalCount = Number.isInteger(totalCount) ? totalCount : 0
+            return {totalCount,items}
         } catch (error) {
             return {err: "error query data"}
         }

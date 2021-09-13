@@ -64,7 +64,7 @@ const GroupCow = {
 
     count: (filter) =>{
         GroupCowModel.count(filter)
-    }    
+    }
 }
 
 module.exports = GroupCow;
