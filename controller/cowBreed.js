@@ -82,8 +82,7 @@ const CowBreed = {
                 let query = {}
                 if(filter.idUser) query.idUser = filter.idUser
                 if(filter.idGroupCow) query.idGroupCow = filter.idGroupCow                
-                let cows = await CowModel.queryByFields(query)
-                console.log("cow", cows)
+                let cows = await CowModel.queryByFields(query)                
                 if(cows.length>0){
                     let cowsBreedId = []
                     cows.forEach((cow)=>{
@@ -100,19 +99,24 @@ const CowBreed = {
             delete filter.idGroupCow
             
             let items = await CowBreedModel.getMany(limit, skip, sortOption, filter, search)
+
             if(items.length > 0){
-                for(let i=0; i<items.length; i++) {
-                    let periods = await PeriodModel.getMany(100,0,{serial:1},{idCowBreed:items[i]._id})
-                    if(periods.length>0){
-                        items[i].periods = periods
-                    }
-                    else{
-                        items[i].periods = []
+                if(query.detail){
+                    for(let i=0; i<items.length; i++) {
+                        let periods = await PeriodModel.getMany(100,0,{serial:1},{idCowBreed:items[i]._id})
+                        if(periods.length>0){
+                            items[i].periods = periods
+                        }
+                        else{
+                            items[i].periods = []
+                        }
                     }
                 }
-            } else{
+                
+            }else{
                 items = []
             }
+
             let totalCount = await CowBreedModel.count(filter)
             totalCount = Number.isInteger(totalCount) ? totalCount : 0
             return {totalCount,items}

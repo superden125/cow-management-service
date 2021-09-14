@@ -112,6 +112,23 @@ const User = {
             }
 
             let items = await UserModel.getMany(limit, skip, sortOption, filter, search)
+            if(items.length>0){
+                let cacheAreaList = []            
+                for(let i=0; i<items.length; i++){
+                    let cacheArea = cacheAreaList.find(x=> x.id == items[i].idArea)
+                    if(cacheArea){
+                        items[i].areaName = cacheArea.name
+                    }else{
+                        let area = await AreaModel.findOne(items[i].idArea)
+                        if(area){
+                            items[i].areaName = area.name
+                            cacheAreaList.push({ id: area._id, name: area.name})
+                        }                        
+                    }
+                    
+                }
+            }
+
             let totalCount = await UserModel.count(filter)        
             return {totalCount,items}    
         } catch (error) {
