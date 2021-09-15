@@ -131,9 +131,9 @@ const CowBreed = {
     },
     
     insertCowBreedAndPeriods: async(data)=>{
-        try {
+        try {                        
             if(!data.name) return {err: "name not null"}
-            if(!data.farmingTime || !Number.isInteger(parseInt(farmingTime)))
+            if(!data.farmingTime || !Number.isInteger(parseInt(data.farmingTime)))
                 return {err: "farmingTime invalid"}
 
             let periods = data.periods
@@ -149,7 +149,7 @@ const CowBreed = {
                 }
             }
             return data
-        } catch (error) {
+        } catch (error) {            
             return {err: error}
         }
     },

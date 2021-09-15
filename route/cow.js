@@ -5,26 +5,7 @@ const CowModel = require('../model/cowModel')
 
 const router = express.Router()    
 
-router.route('/:id')
-    .get(async (req,res)=>{        
-        let id = req.params.id
-        let cow = await CowController.findById(id)        
-        if(!cow) return res.status(400).json({status: false, message: "cow not found"})            
-        res.json({status: true, data: cow})
-    })
-    .put(async (req,res)=>{
-        let id = req.params.id
-        let data = req.body
-        let cow = await CowController.updateOne(id,data)
-        if(cow.err) return res.status(400).json({status: false, message: cow.err})
-        res.json({status: true})
-    })
-    .delete(async (req,res)=>{
-        let id = req.params.id
-        let cow = await CowController.deleteById(id)
-        if(!cow) return res.status(400).json({status: false, message: "cow not found"})
-        res.json({status: true})
-    })
+
 
 router.route('/:idCow/weight/:week')
     .put(async (req,res)=>{
@@ -73,6 +54,36 @@ router.route('/')
         return res.json({status: true, data: result})
     })
 
+router.route('/statistic')
+    .get(async (req,res)=>{
+        let query = req.query
+        query.filter = query.filter ? JSON.parse(query.filter): {} 
+        console.log("query", query)
+        let result = await CowController.statistic(query)
+        if(result.err) return res.status(400).json({err: result.err})
+        res.json({status: true, data: result})
+    })
+
+router.route('/:id')
+    .get(async (req,res)=>{        
+        let id = req.params.id
+        let cow = await CowController.findById(id)        
+        if(!cow) return res.status(400).json({status: false, message: "cow not found"})            
+        res.json({status: true, data: cow})
+    })
+    .put(async (req,res)=>{
+        let id = req.params.id
+        let data = req.body
+        let cow = await CowController.updateOne(id,data)
+        if(cow.err) return res.status(400).json({status: false, message: cow.err})
+        res.json({status: true})
+    })
+    .delete(async (req,res)=>{
+        let id = req.params.id
+        let cow = await CowController.deleteById(id)
+        if(!cow) return res.status(400).json({status: false, message: "cow not found"})
+        res.json({status: true})
+    })
 
 
  module.exports = router

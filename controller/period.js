@@ -6,7 +6,7 @@ const FoodModel = require('../model/foodModel')
 const Period = {
     insertOne: async (data)=>{
         try {
-            
+            console.log("data", data)
             //check cow breed
             if(!data.idCowBreed) return {err: "idCowBreed null"}
             let cowBreed = await CowBreedModel.findOne(data.idCowBreed)
@@ -42,23 +42,23 @@ const Period = {
             
 
             //check foods
-            if(!data.foods || Array.isArray(data.foods)==false)
-                return {err: "list foods invalid"}
+            // if(!data.foods || Array.isArray(data.foods)==false)
+            //     return {err: "list foods invalid"}
             
-            let i = 0
-            while(i<data.foods.length){
+            // let i = 0
+            // while(i<data.foods.length){
 
-                if(!data.foods[i].idFood) return {err: `idFood null at ${i}`}            
-                if(!data.foods[i].amount) return {err: `amount null at ${i}`}
+            //     if(!data.foods[i].idFood) return {err: `idFood null at ${i}`}            
+            //     if(!data.foods[i].amount) return {err: `amount null at ${i}`}
 
-                data.foods[i].amount = parseInt(data.foods[i].amount)                
-                if(Number.isInteger(data.foods[i].amount)==false || data.foods[i].amount <= 0)
-                    return {err: `amount must > 0 at ${i}`}
+            //     data.foods[i].amount = parseInt(data.foods[i].amount)                
+            //     if(Number.isInteger(data.foods[i].amount)==false || data.foods[i].amount <= 0)
+            //         return {err: `amount must > 0 at ${i}`}
 
-                let food = await FoodModel.findOne(data.foods[i].idFood)
-                if(!food) return {err: `food not found at ${i}`}
-                i++
-            }
+            //     let food = await FoodModel.findOne(data.foods[i].idFood)
+            //     if(!food) return {err: `food not found at ${i}`}
+            //     i++
+            // }
 
             let period = await PeriodModel.insertOne(data)
             if(period.insertedId){                
