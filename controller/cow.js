@@ -5,6 +5,7 @@ const UserModel = require('../model/userModel')
 const CowBreedModel = require('../model/cowBreedModel')
 const GroupCowModel = require('../model/groupCowModel')
 const PeriodModel = require('../model/periodModel')
+const  {formatDate} = require('../lib/date')
 
 const Cow = {
     insertOne: async (data)=>{
@@ -200,20 +201,21 @@ const Cow = {
         let {idUser} = filter           
         let result = []     
         if(!idUser) return {err: "idUser null"}
+        if(!from) from = formatDate()
+        if(!to) to = formatDate()        
         if(!!from && !!to){
             from = new Date(`${from} 00:00`).getTime()
-            to = new Date(`${to} 23:59`).getTime()            
+            to = new Date(`${to} 23:59`).getTime()                  
             Object.assign(filter, {createdAt: { $gt : from , $lt : to }})
         }
                  
         let cows = await CowModel.queryByFields(filter)        
-        if(cows.length == 0) return cows
+        if(cows.length == 0) return cows        
         for(let i = 0; i < cows.length; i++){
             let cow = cows[i]
-            let item = {_id: cow._id, serial: cow.serial}
-            if(!cow.weight) item.weight = []
-            else{                
-                item.weight = cow.weight.filter(x=> x.createdAt >= from && x.createdAt <= to)
+            let item = {_id: cow._id, serial: cow.serial, weight: []}            
+            if(cow.weight && cow.weight.length > 0){                
+                item.weight = cow.weight.filter(x=> x.createdAt >= from && x.createdAt <= to)                
             }
             result.push(item)
         }
