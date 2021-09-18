@@ -157,7 +157,7 @@ const CowBreed = {
     updateCowBreedAndPeriods: async(id, data)=>{
         try {
 
-            if(data.farmingTime && !Number.isInteger(parseInt(farmingTime)))
+            if(data.farmingTime && !Number.isInteger(parseInt(data.farmingTime)))
                 return {err: "farmingTime invalid"}
 
             let periods = data.periods
