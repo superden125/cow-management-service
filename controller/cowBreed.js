@@ -165,11 +165,16 @@ const CowBreed = {
             let cowBreed = await CowBreedModel.updateOne(id,data)
             if(!cowBreed) return {err: "update cow breed fail"}
             if(periods && periods.length > 0){
-                for(let i = 0; i < periods.length; i++){   
-                    delete periods[i].idCowBreed
-                    // let period = await PeriodModel.updateOne(periods[i]._id,periods[i])
-                    let period = await PeriodController.updateOne(periods[i]._id, periods[i])
-                    if(!period) return {err: "update period fail"}
+                for(let i = 0; i < periods.length; i++){
+                    if(periods[i]._id){
+                        delete periods[i].idCowBreed
+                        // let period = await PeriodModel.updateOne(periods[i]._id,periods[i])
+                        let period = await PeriodController.updateOne(periods[i]._id, periods[i])
+                        if(!period) return {err: "update period fail"}
+                    }else{
+                        let period = await PeriodController.insertOne(periods[i])
+                        if(!period) return {err: "insert period fail"}
+                    }                    
                 }
             }
             return true
