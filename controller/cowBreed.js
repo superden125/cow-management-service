@@ -164,7 +164,7 @@ const CowBreed = {
             delete data.periods
             let cowBreed = await CowBreedModel.updateOne(id,data)
             if(!cowBreed) return {err: "update cow breed fail"}
-            if(periods.length > 0){
+            if(periods && periods.length > 0){
                 for(let i = 0; i < periods.length; i++){   
                     delete periods[i].idCowBreed
                     // let period = await PeriodModel.updateOne(periods[i]._id,periods[i])
@@ -174,6 +174,7 @@ const CowBreed = {
             }
             return true
         } catch (error) {
+            console.log("err", error)
             return {err: error}
         }
     },
