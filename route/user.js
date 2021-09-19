@@ -55,7 +55,7 @@ router.route('/:id')
     .get(isManager, async (req,res)=>{
         let user = req.session.user
         let id = req.params.id
-        let result = await UserController.queryByFields({idManager: user._id, _id: id})
+        let result = await UserController.queryByFields({idManager: user._id, _id: id})        
         if(result.err || result.length == 0) return res.status(400).json({status: false, message: "user not found"})
         res.json({status: true, data: result[0]})
     })

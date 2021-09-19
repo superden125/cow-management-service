@@ -197,7 +197,7 @@ const Cow = {
     },
 
     statistic: async (query) =>{
-        let {from, to, filter} = query
+        let {from, to, filter, groupBy} = query
         let {idUser} = filter           
         let result = []     
         if(!idUser) return {err: "idUser null"}
@@ -210,7 +210,26 @@ const Cow = {
         }
                  
         let cows = await CowModel.queryByFields(filter)        
-        if(cows.length == 0) return cows        
+        if(cows.length == 0) return cows
+        
+        //group period
+        let cowBreedList = []
+        let j = 0
+        if(groupBy=="period"){            
+            for(let i = 0; i < cows.length; i++){
+                let cow = cows[i]
+                //get cow breed name                
+                let cacheCowBreed = cowBreedList.find(x => x.id == cow.idCowBreed)
+                if(cacheCowBreed){
+                    cacheCowBreed.cows.push(cow)                 
+                }else{
+                    let cowBreed = await CowBreedModel.findOne(cow.idCowBreed)                 
+                    cowBreedList.push({id: cowBreed._id, name: cowBreed.name, cows: [cow]})
+                }                
+            }
+            return cowBreedList
+        }
+        
         for(let i = 0; i < cows.length; i++){
             let cow = cows[i]
             let item = {_id: cow._id, serial: cow.serial, weight: []}            

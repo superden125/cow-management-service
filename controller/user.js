@@ -47,6 +47,22 @@ const User = {
         try{
             let result = await UserModel.queryByFields(query)
             if(result.err) return {err: result.err}
+            if(result.length>0){
+                let cacheAreaList = []            
+                for(let i=0; i<result.length; i++){
+                    let cacheArea = cacheAreaList.find(x=> x.id == result[i].idArea)
+                    if(cacheArea){
+                        result[i].areaName = cacheArea.name
+                    }else{
+                        let area = await AreaModel.findOne(result[i].idArea)
+                        if(area){
+                            result[i].areaName = area.name
+                            cacheAreaList.push({ id: area._id, name: area.name})
+                        }                        
+                    }
+                    
+                }
+            }
             return result
         }catch(error){
             return {err: error}
