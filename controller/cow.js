@@ -66,7 +66,7 @@ const Cow = {
                 if(currentPeriod[0]){                    
                     cow.currentPeriodId = currentPeriod[0]._id
                     cow.currentPeriodName = currentPeriod[0].name
-                }                    
+                }
             }
             return cow
         } catch (error) {
@@ -94,9 +94,8 @@ const Cow = {
                 let groupCow = await GroupCowModel.findOne(data.idGroupCow)
                 if(!groupCow) return {err: "group cow not found"}
             }
-            if(data.birthday){
-                data.birthday = parseInt(data.birthday)
-                if(Number.isInteger(data.birthday)==false)
+            if(data.birthday){                
+                if((new Date(data.birthday))=='Invalid Date')
                     return {err: "birthday invalid"}
             }            
 
@@ -168,7 +167,9 @@ const Cow = {
                             cow.currentPeriodId = cachePeriod.id
                             cow.currentPeriodName = cachePeriod.name
                         }else{
-                            let currentPeriod = await PeriodModel.getMany(1,0,{endDay:1},{idCowBreed: cow.idCowBreed,startDay: {$gte: cow.daysOld}})                        
+                            // let currentPeriod = await PeriodModel.getMany(10,0,{endDay:1},{idCowBreed: cow.idCowBreed,startDay: {$gte: cow.daysOld}})
+                            let currentPeriod = await PeriodModel.getMany(1,0,{},{idCowBreed: cow.idCowBreed, $and:[{startDay: {$lte: cow.daysOld}}, {endDay: {$gte: cow.daysOld}}] })
+                            console.log("current", currentPeriod, cow)
                             if(currentPeriod[0]){
                                 cow.currentPeriodId = currentPeriod[0]._id
                                 cow.currentPeriodName = currentPeriod[0].name
@@ -202,7 +203,7 @@ const Cow = {
         let result = []     
         if(!idUser) return {err: "idUser null"}
         if(!from) from = formatDate()
-        if(!to) to = formatDate()        
+        if(!to) to = formatDate()  
         if(!!from && !!to){
             from = new Date(`${from} 00:00`).getTime()
             to = new Date(`${to} 23:59`).getTime()                  
@@ -213,21 +214,41 @@ const Cow = {
         if(cows.length == 0) return cows
         
         //group period
-        let cowBreedList = []
+        let periodList = []
         let j = 0
         if(groupBy=="period"){            
             for(let i = 0; i < cows.length; i++){
                 let cow = cows[i]
-                //get cow breed name                
-                let cacheCowBreed = cowBreedList.find(x => x.id == cow.idCowBreed)
-                if(cacheCowBreed){
-                    cacheCowBreed.cows.push(cow)                 
+
+                //get current period
+                cow.daysOld = dateUtil.getDaysOld(cow.birthday)
+                let cachePeriod = periodList.find(x => x.startDay <= cow.daysOld && x.endDay >= cow.daysOld)
+                if(cachePeriod){                    
+                    cachePeriod.cows.push(cow)
                 }else{
-                    let cowBreed = await CowBreedModel.findOne(cow.idCowBreed)                 
-                    cowBreedList.push({id: cowBreed._id, name: cowBreed.name, cows: [cow]})
-                }                
+                    let currentPeriod = await PeriodModel.getMany(1,0,{},{idCowBreed: cow.idCowBreed, $and:[{startDay: {$lte: cow.daysOld}}, {endDay: {$gte: cow.daysOld}}] })
+                    if(currentPeriod[0]){                        
+                        periodList.push({
+                            id: currentPeriod[0]._id, 
+                            name: currentPeriod[0].name, 
+                            startDay: currentPeriod[0].startDay, 
+                            endDay: currentPeriod[0].endDay,
+                            cows: [cow]
+                        })
+                    }
+                }
+                
+
+                //get cow breed name 
+                // let cachePeriod = periodList.find(x => x.id == cow.idCowBreed)
+                // if(cachePeriod){
+                //     cachePeriod.cows.push(cow)                 
+                // }else{
+                //     let cowBreed = await CowBreedModel.findOne(cow.idCowBreed)                 
+                //     periodList.push({id: cowBreed._id, name: cowBreed.name, cows: [cow]})
+                // }                
             }
-            return cowBreedList
+            return periodList
         }
         
         for(let i = 0; i < cows.length; i++){

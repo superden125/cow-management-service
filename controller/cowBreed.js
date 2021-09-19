@@ -172,6 +172,7 @@ const CowBreed = {
                         let period = await PeriodController.updateOne(periods[i]._id, periods[i])
                         if(!period) return {err: "update period fail"}
                     }else{
+                        periods[i].idCowBreed = id
                         let period = await PeriodController.insertOne(periods[i])
                         if(!period) return {err: "insert period fail"}
                     }                    
