@@ -63,9 +63,8 @@ var UserModel = {
 
     queryByFields: async (filter)=>{
         try {            
-            console.log(filter)
             filter.deleted = false        
-            let doc = await _collection.find(filter).project({ password: 0}).toArray()            
+            let doc = await _collection.find(filter).toArray()            
             return doc
         } catch (error) {
             return {err: error}

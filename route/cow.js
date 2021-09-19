@@ -57,8 +57,8 @@ router.route('/')
 router.route('/statistic')
     .get(async (req,res)=>{
         let query = req.query
-        query.filter = query.filter ? JSON.parse(query.filter): {} 
-        console.log("query", query)
+        query.filter = query.filter ? JSON.parse(query.filter): {}
+        if(query.groupBy == 'period' && !query.filter.idCowBreed) return res.status(400).json({status: false, message: "group by period require idCowBreed"})    
         let result = await CowController.statistic(query)
         if(result.err) return res.status(400).json({err: result.err})
         res.json({status: true, data: result})

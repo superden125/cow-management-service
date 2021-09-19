@@ -50,6 +50,7 @@ const User = {
             if(result.length>0){
                 let cacheAreaList = []            
                 for(let i=0; i<result.length; i++){
+                    delete result[i].password
                     let cacheArea = cacheAreaList.find(x=> x.id == result[i].idArea)
                     if(cacheArea){
                         result[i].areaName = cacheArea.name
@@ -228,6 +229,7 @@ const User = {
             userDB.token = token
             return userDB
         } catch (error) {
+            console.log("ee", error)
             return {err: error}
         }
     },

@@ -21,22 +21,22 @@ router.route('/logout')
         res.json({status: true})        
     })
 
-router.route('/changePassword')
-    .put(isLogin, async (req,res)=>{
-        let user = req.session.user
-        let {password} = req.body
-        let result = await UserController.changePassword(user._id,password)
-        if(result.err) return res.status(400).json({status: false, message: result.err})
-        res.json({status: true})
-    })
+// router.route('/changePassword')
+//     .put(isLogin, async (req,res)=>{
+//         let user = req.session.user
+//         let {password} = req.body
+//         let result = await UserController.changePassword(user._id,password)
+//         if(result.err) return res.status(400).json({status: false, message: result.err})
+//         res.json({status: true})
+//     })
 
-router.route('/update')
-    .put(isLogin, async (req,res)=>{
-        let user = req.session.user
-        let data = req.body
-        let result = await UserController.updateOne(user._id,data)
-        if(result.err) return res.status(400).json({status: false, message: result.err})
-        res.json({status: true})
-    })
+// router.route('/update')
+//     .put(isLogin, async (req,res)=>{
+//         let user = req.session.user
+//         let data = req.body
+//         let result = await UserController.updateOne(user._id,data)
+//         if(result.err) return res.status(400).json({status: false, message: result.err})
+//         res.json({status: true})
+//     })
 
 module.exports = router

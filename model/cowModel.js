@@ -62,8 +62,7 @@ var CowModel = {
     },
 
     queryByFields: async (filter)=>{
-        try {            
-            console.log(filter)
+        try {                        
             filter.deleted = false        
             let doc = await _collection.find(filter).toArray()            
             return doc

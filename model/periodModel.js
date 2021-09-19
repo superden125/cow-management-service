@@ -73,11 +73,9 @@ var PeriodModel = {
     },
 
     getMany: async (limit, skip, sort, filter)=>{
-        try {
-            console.log("query", limit, skip, sort, filter)
+        try {            
             filter.deleted = filter.deleted ? filter.deleted : false
-            let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()   
-            console.log("period", doc)         
+            let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()               
             return doc
         } catch (error) {
             return {err: error}

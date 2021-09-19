@@ -26,7 +26,17 @@ router.route('/update')
     .put(async (req,res)=>{
         let user = req.session.user
         let data = req.body
+        delete data.idManager
         let result = await UserController.updateOne(user._id, data)
+        if(result.err) return res.status(400).json({status: false, message: result.err})
+        res.json({status: true})
+    })
+
+router.route('/changePassword')
+    .put(async (req,res)=>{
+        let user = req.session.user
+        let {password} = req.body
+        let result = await UserController.changePassword(user._id,password)
         if(result.err) return res.status(400).json({status: false, message: result.err})
         res.json({status: true})
     })
