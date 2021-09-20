@@ -13,6 +13,10 @@ const Food = {
             let area = await AreaModel.findOne(data.idArea)
             if(!area) return {err: "idArea not found"}
 
+            if(data.ingredient && data.ingredient.length > 0){
+                data.ingredient.map(item => item.idIngredient = shortid.generate())
+            }
+
             //insert db
             let food = await FoodModel.insertOne(data)
             if(food.insertedId){                

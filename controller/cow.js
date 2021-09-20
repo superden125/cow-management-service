@@ -169,7 +169,7 @@ const Cow = {
                         }else{
                             // let currentPeriod = await PeriodModel.getMany(10,0,{endDay:1},{idCowBreed: cow.idCowBreed,startDay: {$gte: cow.daysOld}})
                             let currentPeriod = await PeriodModel.getMany(1,0,{},{idCowBreed: cow.idCowBreed, $and:[{startDay: {$lte: cow.daysOld}}, {endDay: {$gte: cow.daysOld}}] })
-                            console.log("current", currentPeriod, cow)
+                            // console.log("current", currentPeriod, cow)
                             if(currentPeriod[0]){
                                 cow.currentPeriodId = currentPeriod[0]._id
                                 cow.currentPeriodName = currentPeriod[0].name
