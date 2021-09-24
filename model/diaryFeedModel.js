@@ -120,6 +120,56 @@ var DiaryFeedModel = {
         } catch (error) {
             return {err: error}
         }
+    },
+
+    statistic : async (idCow, filter)=>{
+        try {
+            console.log("filter", filter)  
+            let pipeline = [
+                {   
+                  '$match': filter
+                  
+                }, {
+                  '$group': {
+                    '_id': '$idCow', 
+                    'food': {
+                      '$push': '$foods'
+                    }
+                  }
+                }, {
+                  '$unwind': {
+                    'path': '$food'
+                  }
+                }, {
+                  '$unwind': {
+                    'path': '$food'
+                  }
+                }, {
+                  '$group': {
+                    '_id': '$food.idFood', 
+                    'amount': {
+                      '$push': '$food.amount'
+                    }
+                  }
+                }, {
+                  '$addFields': {
+                    'total': {
+                      '$sum': '$amount'
+                    }
+                  }
+                }
+                // , {
+                //     '$unset': ['amount']
+                // }
+                
+              ] 
+              
+            let data = await _collection.aggregate(pipeline).toArray()
+            console.log("data", data)
+            return data
+        } catch (error) {
+            
+        }
     }
 }
 

@@ -5,6 +5,7 @@ const UserModel = require('../model/userModel')
 const CowBreedModel = require('../model/cowBreedModel')
 const GroupCowModel = require('../model/groupCowModel')
 const PeriodModel = require('../model/periodModel')
+const DiaryFeedModel = require('../model/diaryFeedModel')
 const  {formatDate} = require('../lib/date')
 
 const Cow = {
@@ -29,7 +30,7 @@ const Cow = {
                 if(!groupCow) return {err: "group cow not found"}
             }
 
-            // data.birthday = parseInt(data.birthday)
+            // data.birthday = parseInt(data.birthday) 
             data.birthday = new Date(data.birthday).getTime()
             if(Number.isInteger(data.birthday)==false)
                 return {err: "birthday invalid"}            
@@ -252,6 +253,55 @@ const Cow = {
             }
             return periodList.sort((a, b)=> parseInt(a.startDay)-parseInt(b.startDay))            
         }
+
+        if(groupBy=="food"){
+            let periodList = []
+            for(let i = 0; i < cows.length; i++){
+                let cow = cows[i]
+
+                //get current period
+                cow.daysOld = dateUtil.getDaysOld(cow.birthday)                
+                let cachePeriod = periodList.find(x => x.startDay <= cow.daysOld && x.endDay >= cow.daysOld)
+                if(!cachePeriod){
+                    let currentPeriod = await PeriodModel.getMany(1,0,{},{idCowBreed: cow.idCowBreed, $and:[{startDay: {$lte: cow.daysOld}}, {endDay: {$gte: cow.daysOld}}] })
+                    if(currentPeriod[0]){                        
+                        periodList.push({
+                            id: currentPeriod[0]._id, 
+                            name: currentPeriod[0].name, 
+                            startDay: currentPeriod[0].startDay, 
+                            endDay: currentPeriod[0].endDay                           
+                        })
+                    }
+                }                
+            }
+            periodList = periodList.sort((a, b)=>parseInt(a.startDay)-parseInt(b.startDay))
+            console.log("period", periodList)
+            for(let i = 0; i < periodList.length; i++){
+                periodList[i].cows = []
+                for(let j = 0; j < cows.length; j++){
+                    let cow = cows[j]
+                    if(cow.daysOld >= periodList[i].startDay){                        
+                        console.log("dayOls", cow.daysOld, "startDay", periodList[i].startDay, "cow brithday", cow.birthday)
+                        let filter = {
+                            idCow: cow._id,
+                            createdAt: 
+                                {   $gte: cow.birthday +  86400000 * (periodList[i].startDay - 1), 
+                                    $lte: cow.birthday +  86400000 * (periodList[i].endDay - 1)
+                                }
+                        }
+                        let foods = await DiaryFeedModel.statistic(cow._id, filter)
+                        console.log("foods", foods)
+                        periodList[i].cows.push({
+                            _id: cow._id,
+                            serial: cow.serial,
+                            foods
+                        })
+                    }
+                }
+            }
+            return periodList.sort((a, b)=> parseInt(a.startDay)-parseInt(b.startDay))            
+        }
+
         
         for(let i = 0; i < cows.length; i++){
             let cow = cows[i]
