@@ -1,4 +1,5 @@
 "use strict";
+const shortid = require('shortid')
 const PeriodModel = require('../model/periodModel')
 const CowBreedModel = require('../model/cowBreedModel')
 const FoodModel = require('../model/foodModel')
@@ -59,6 +60,10 @@ const Period = {
             //     if(!food) return {err: `food not found at ${i}`}
             //     i++
             // }
+
+            if(data.nutrition && data.nutrition.length > 0){
+                data.nutrition.map(item => item.idNutrition = shortid.generate())
+            }
 
             let period = await PeriodModel.insertOne(data)
             if(period.insertedId){                
@@ -137,6 +142,10 @@ const Period = {
                     if(!food) return {err: `food not found at ${i}`}
                     i++
                 }
+            }
+
+            if(data.nutrition && data.nutrition.length > 0){
+                data.nutrition.map(item => item.idNutrition = item.idNutrition ? item.idNutrition : shortid.generate())
             }
 
             let period = await PeriodModel.updateOne(id,data)            
@@ -219,6 +228,35 @@ const Period = {
             console.log("result", result)
             return result
         } catch (error) {
+            return {err: error}
+        }
+    },
+    deleteNutrition: async (idPeriod, idNutrition)=>{
+        try {
+            let result = await PeriodModel.removeItem(idPeriod, {nutrition:{idNutrition}})            
+            return result
+        }catch (error) {
+            return {err: error}
+        }
+    },
+    updateNutrition: async (idPeriod, idNutrition, data)=>{
+        try {
+            let filter = {_id: idPeriod, "nutrition.idNutrition": idNutrition}            
+            data.idNutrition = idNutrition
+            let newData = {"nutrition.$": data}            
+            let result = await PeriodModel.updateItem(filter, newData)                        
+            return result
+        } catch (error) {            
+            return {err: error}
+        }
+    },
+    pushNutrition: async (_id, data)=>{
+        try {           
+            data.map(item => item.idNutrition = shortid.generate()) 
+            let result = await PeriodModel.pushItem(_id, {nutrition: { $each: data}})            
+            return result
+        } catch (error) {
+            console.log("error", error)
             return {err: error}
         }
     }

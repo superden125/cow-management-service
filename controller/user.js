@@ -243,7 +243,7 @@ const User = {
             delete result.password
             if(!user) return {err: "update false"}
             return true
-        } catch (error) {
+        } catch (error) {            
             return {err: error}
         }
     },

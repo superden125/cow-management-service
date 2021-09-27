@@ -6,7 +6,7 @@ const {isManager} = require('../middleware/auth')
 const router = express.Router()    
 
 router.route('/:id')
-    .get(async (req,res)=>{
+    .get(async (req,res)=>{        
         let id = req.params.id
         let period = await PeriodController.findById(id)        
         if(!period) return res.status(400).json({status: false, message: "period not found"})            
@@ -34,7 +34,7 @@ router.route('/')
         if(periods.err) return res.status(400).json({status: false, message: periods.err})
         res.json({status: true, data: periods})        
     })
-    .post(isManager, async (req,res)=>{
+    .post(isManager, async (req,res)=>{        
         let data = req.body                                    
         let result = await PeriodController.insertOne(data)        
         if(result.err) return res.status(400).json({status: false, message: result.err}) 
@@ -42,48 +42,28 @@ router.route('/')
     })
 
 //chua lam nutrition
-router.route('/:id/nutrition')
+router.route('/:idPeriod/nutrition')
+    .post(async (req,res)=>{        
+        let {idPeriod} = req.params
+        let data = req.body
+        let result = await PeriodController.pushNutrition(idPeriod, data)
+        if(!result || result.err) return res.status(400).json({status: false})
+        res.json({status: true})
+    })
+
+router.route('/:idPeriod/nutrition/:idNutrition')
     .put(async (req,res)=>{
-        try {
-            let id = req.params.id
-            let data = {}
-            data.nutrition = req.body
-            let period = await PeriodController.updateOne(id,data)
-            if(period.err) return res.status(400).json({status: false, message: period.err})
-            res.json({status: true})
-        } catch (error) {            
-            res.status(400).json({status: false})
-        }
+        let {idPeriod, idNutrition} = req.params
+        let data = req.body
+        if(!data.amount) return res.status(400).json({status: false, message: "amount invalid"})
+        
+        let result = await PeriodController.updateNutrition(idPeriod,idNutrition, data)
+        if(!result || result.err) return res.status(400).json({status: false})
+        res.json({status: true})
     })
     .delete(async (req,res)=>{
         let {idPeriod, idNutrition} = req.params
-        let result = await PeriodController.deleteFood(idPeriod,idFood)
-        if(!result || result.err) return res.status(400).json({status: false})
-        res.json({status: true})
-    })
-
-router.route('/:idPeriod/nutrition')
-    .post(async (req,res)=>{
-        let {idPeriod} = req.params
-        let data = req.body
-        let result = await PeriodController.pushFood(idPeriod, data)
-        if(!result || result.err) return res.status(400).json({status: false})
-        res.json({status: true})
-    })
-
-router.route('/:idPeriod/food/:idFood')
-    .put(async (req,res)=>{
-        let {idPeriod, idFood} = req.params
-        let {amount} = req.body
-        if(!amount) return res.status(400).json({status: false, message: "amount invalid"})
-        
-        let result = await PeriodController.updateFood(idPeriod,idFood, {amount})
-        if(!result || result.err) return res.status(400).json({status: false})
-        res.json({status: true})
-    })
-    .delete(async (req,res)=>{
-        let {idPeriod, idFood} = req.params
-        let result = await PeriodController.deleteFood(idPeriod,idFood)
+        let result = await PeriodController.deleteNutrition(idPeriod,idNutrition)
         if(!result || result.err) return res.status(400).json({status: false})
         res.json({status: true})
     })

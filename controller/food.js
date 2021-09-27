@@ -52,6 +52,10 @@ const Food = {
                 if(!area) return {err: "idArea not found"}
             }            
 
+            if(data.ingredient && data.ingredient.length > 0){
+                data.ingredient.map(item => item.idIngredient = item.idIngredient ? item.idIngredient : shortid.generate())
+            }
+
             //update db
             let food = await FoodModel.updateOne(id,data)            
             if(!food) return {err: "update false"}

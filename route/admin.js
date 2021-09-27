@@ -1,4 +1,5 @@
 const express = require('express')
+const shortid = require('shortid')
 const UserController = require('../controller/user')
 const {isAdmin} = require('../middleware/auth')
 
@@ -42,6 +43,15 @@ router.route('/user')
         let result = await UserController.insertOne(data)
         if(result.err) return res.status(400).json({status: false, message: result.err})
         res.json({status: true, data: result})
+    })
+
+router.route('/user/:idUser/resetPassword')
+    .put(async (req,res)=>{
+        let idUser = req.params.idUser        
+        let newPassword = shortid.generate()
+        let result = await UserController.changePassword(idUser, newPassword)        
+        if(result.err) return res.json({status: false, message: result.err})
+        res.json({status: true, data: newPassword})
     })
 
  module.exports = router
