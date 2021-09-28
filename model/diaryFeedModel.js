@@ -158,9 +158,9 @@ var DiaryFeedModel = {
                     }
                   }
                 }
-                // , {
-                //     '$unset': ['amount']
-                // }
+                , {
+                    '$unset': ['amount']
+                }
                 
               ] 
               

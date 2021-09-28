@@ -62,11 +62,19 @@ var PeriodModel = {
         }
     },
 
-    queryByFields: async (filter)=>{
-        try {            
-            filter.deleted = false                 
-            let doc = await _collection.find(filter).toArray()            
-            return doc
+    queryByFields: async (filter, projectList = "all")=>{
+        try {                        
+            filter.deleted = false
+            if(projectList == "all"){
+                let doc = await _collection.find(filter).toArray()
+                return doc
+            }                
+            else{
+                let project = {}                
+                projectList.map(field => project[field] = 1)                
+                let doc = await _collection.find(filter).project(project).toArray()
+                return doc
+            }            
         } catch (error) {
             return {err: error}
         }
