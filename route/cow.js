@@ -1,11 +1,7 @@
 const express = require('express')
 const CowController = require('../controller/cow')
-const CowModel = require('../model/cowModel')
-
 
 const router = express.Router()    
-
-
 
 router.route('/:idCow/weight/:week')
     .put(async (req,res)=>{
@@ -26,10 +22,11 @@ router.route('/:idCow/weight/:week')
 
 router.route('/:idCow/weight')
     .get(async (req,res)=>{
-        let {idCow} = req.params
-        let result = await CowModel.findOne(idCow)
-        if(!result) return res.status(400).json({status: false, message: "cow not found"})        
-        res.json({status: true, data: result.weight})
+        res.json({status: true})
+        // let {idCow} = req.params
+        // let result = await CowController.
+        // if(!result) return res.status(400).json({status: false, message: "cow not found"})        
+        // res.json({status: true, data: result.weight})
     })
     .post(async (req,res)=>{
         let {idCow} = req.params

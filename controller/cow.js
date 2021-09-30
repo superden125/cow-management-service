@@ -216,32 +216,33 @@ const Cow = {
         
         //group period        
         if(groupBy=="period"){            
-            let periodList = []
-            for(let i = 0; i < cows.length; i++){
-                let cow = cows[i]
+            // let periodList = []
+            // for(let i = 0; i < cows.length; i++){
+            //     let cow = cows[i]
 
-                //get current period
-                cow.daysOld = dateUtil.getDaysOld(cow.birthday)                
-                let cachePeriod = periodList.find(x => x.startDay <= cow.daysOld && x.endDay >= cow.daysOld)
-                if(!cachePeriod){
-                    let currentPeriod = await PeriodModel.getMany(1,0,{},{idCowBreed: cow.idCowBreed, $and:[{startDay: {$lte: cow.daysOld}}, {endDay: {$gte: cow.daysOld}}] })
-                    if(currentPeriod[0]){                        
-                        periodList.push({
-                            id: currentPeriod[0]._id, 
-                            name: currentPeriod[0].name, 
-                            startDay: currentPeriod[0].startDay, 
-                            endDay: currentPeriod[0].endDay                           
-                        })
-                    }
-                }                
-            }
+            //     //get current period
+            //     cow.daysOld = dateUtil.getDaysOld(cow.birthday)                
+            //     let cachePeriod = periodList.find(x => x.startDay <= cow.daysOld && x.endDay >= cow.daysOld)
+            //     if(!cachePeriod){
+            //         let currentPeriod = await PeriodModel.getMany(1,0,{},{idCowBreed: cow.idCowBreed, $and:[{startDay: {$lte: cow.daysOld}}, {endDay: {$gte: cow.daysOld}}] })
+            //         if(currentPeriod[0]){                        
+            //             periodList.push({
+            //                 _id: currentPeriod[0]._id, 
+            //                 name: currentPeriod[0].name, 
+            //                 startDay: currentPeriod[0].startDay, 
+            //                 endDay: currentPeriod[0].endDay                           
+            //             })
+            //         }
+            //     }                
+            // }
 
+            let periodList = await PeriodModel.queryByFields({idCowBreed: filter.idCowBreed},["_id","startDay","endDay","name"])            
             for(let i = 0; i < periodList.length; i++){
                 periodList[i].cows = []
                 for(let j = 0; j < cows.length; j++){
                     let cow = cows[j]
-                    if(cow.daysOld >= periodList[i].startDay){                        
-
+                    cow.daysOld = dateUtil.getDaysOld(cow.birthday)                    
+                    if(cow.daysOld >= periodList[i].startDay){
                         periodList[i].cows.push({
                             _id: cow._id,
                             serial: cow.serial,
@@ -288,7 +289,7 @@ const Cow = {
             // }
 
             periodList = periodList.sort((a, b)=>parseInt(a.startDay)-parseInt(b.startDay))
-            console.log("period", periodList)
+            // console.log("period", periodList)
             for(let i = 0; i < periodList.length; i++){
                 periodList[i].cows = []
                 for(let j = 0; j < cows.length; j++){                    
