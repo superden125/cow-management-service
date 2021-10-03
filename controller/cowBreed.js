@@ -31,7 +31,7 @@ const CowBreed = {
         try {
             let cowBreed = await CowBreedModel.findOne(id)
             if(!cowBreed) return {err: "cow breed not found"}
-            let periods = await PeriodModel.getMany(100,0,{serial:1},{idCowBreed:cowBreed._id})            
+            let periods = await PeriodModel.getMany(100,0,{startDay:1},{idCowBreed:cowBreed._id})            
             if(periods.length>0) cowBreed.periods = periods
             return cowBreed
         } catch (error) {
@@ -103,7 +103,7 @@ const CowBreed = {
             if(items.length > 0){
                 if(query.detail){
                     for(let i=0; i<items.length; i++) {
-                        let periods = await PeriodModel.getMany(100,0,{serial:1},{idCowBreed:items[i]._id})
+                        let periods = await PeriodModel.getMany(100,0,{startDay:1},{idCowBreed:items[i]._id})
                         if(periods.length>0){
                             items[i].periods = periods
                         }

@@ -65,6 +65,8 @@ const Period = {
                 data.nutrition.map(item => item.idNutrition = shortid.generate())
             }
 
+            delete data.foods
+
             let period = await PeriodModel.insertOne(data)
             if(period.insertedId){                
                 return data
@@ -77,7 +79,16 @@ const Period = {
     },
     findById: async (id)=>{
         try {
-            let period = await PeriodModel.findOne(id)            
+            let period = await PeriodModel.findOne(id)
+            if(period.foods && period.foods.length > 0){
+                for(let i = 0; i < period.foods.length; i++){
+                    let food = await FoodModel.findOne(period.foods[i].idFood)
+                    if(food){
+                        period.foods[i].name = food.name
+                        period.foods[i].unit = food.unit
+                    }
+                }
+            }
             return period
         } catch (error) {
             return {err: error}
@@ -126,27 +137,29 @@ const Period = {
 
 
             //check foods
-            if(data.foods && Array.isArray(data.foods)==true){
-                let i = 0
-                while(i<data.foods.length){
+            // if(data.foods && Array.isArray(data.foods)==true){
+            //     let i = 0
+            //     while(i<data.foods.length){
 
-                    if(!data.foods[i].idFood) return {err: `idFood null at ${i}`}
-                    if(!data.foods[i].amount) return {err: `amount null at ${i}`}
-                    data.foods[i].amount = parseFloat(data.foods[i].amount)                    
-                    // if(Number.isInteger(data.foods[i].amount)==false || data.foods[i].amount <= 0)
-                    //     return {err: `amount must > 0 at ${i}`}
-                    if(isNaN(data.foods[i].amount) || data.foods[i].amount <= 0)
-                        return {err: `amount must > 0 at ${i}`}
+            //         if(!data.foods[i].idFood) return {err: `idFood null at ${i}`}
+            //         if(!data.foods[i].amount) return {err: `amount null at ${i}`}
+            //         data.foods[i].amount = parseFloat(data.foods[i].amount)                    
+            //         // if(Number.isInteger(data.foods[i].amount)==false || data.foods[i].amount <= 0)
+            //         //     return {err: `amount must > 0 at ${i}`}
+            //         if(isNaN(data.foods[i].amount) || data.foods[i].amount <= 0)
+            //             return {err: `amount must > 0 at ${i}`}
                         
-                    let food = await FoodModel.findOne(data.foods[i].idFood)
-                    if(!food) return {err: `food not found at ${i}`}
-                    i++
-                }
-            }
+            //         let food = await FoodModel.findOne(data.foods[i].idFood)
+            //         if(!food) return {err: `food not found at ${i}`}
+            //         i++
+            //     }
+            // }
 
             if(data.nutrition && data.nutrition.length > 0){
                 data.nutrition.map(item => item.idNutrition = item.idNutrition ? item.idNutrition : shortid.generate())
             }
+
+            delete data.foods
 
             let period = await PeriodModel.updateOne(id,data)            
             if(!period) return {err: "update false"}
@@ -175,6 +188,22 @@ const Period = {
             }
 
             let items = await PeriodModel.getMany(limit, skip, sortOption, filter)
+
+            if(items.length > 0){
+                for(let i = 1; i < items.length; i++){
+                    let period = items[i]
+                    if(period.foods.length > 0){
+                        for(let j = 0; j < period.foods.length; j++){
+                            let food = await FoodModel.findOne(period.foods[j].idFood)
+                            if(food){
+                                period.foods[j].name = food.name
+                                period.foods[j].unit = food.unit
+                            }
+                        }
+                    }
+                }                
+            }
+
             let totalCount = await PeriodModel.count(filter)
             return {totalCount,items}
         } catch (error) {
