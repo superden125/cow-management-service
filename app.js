@@ -8,7 +8,7 @@ import morgan from 'morgan'
 import {connectDB} from './model/index'
 import {port} from './config/host'
 import {isLogin} from './middleware/auth'
-
+import path from 'path'
 const app = express()
 app.use(morgan('dev'))
 app.use(session(
@@ -21,7 +21,7 @@ app.use(session(
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(cors())
-
+app.use(express.static(path.join(__dirname, 'public')))
 connectDB((err)=>{
     
     if(err){

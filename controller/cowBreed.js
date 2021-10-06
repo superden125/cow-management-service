@@ -3,6 +3,9 @@ const CowBreedModel = require('../model/cowBreedModel')
 const PeriodModel = require('../model/periodModel')
 const CowModel = require('../model/cowModel')
 const PeriodController = require('./period')
+const FoodModel = require('../model/foodModel')
+
+const {convertJsonToPDF} = require('../lib/utils')
 
 const CowBreed = {
     insertOne: async (data)=>{
@@ -213,18 +216,39 @@ const CowBreed = {
 
     getFood: async(id)=>{
         try {
-            let result = []
-            let periods = await PeriodModel.queryByFields({idCowBreed: id})
+            let cowBreed = await CowBreedModel.findOne(id)
+            if(!cowBreed || cowBreed.err) return {err: "cow breed not found"}
+            let periods = await PeriodModel.queryByFields({idCowBreed: id}, ["_id", "foods", "name", "serial" ])
             if(periods.length==0) return []            
-            periods.forEach((period)=>{
-                result.push({
-                    _id: period._id,
-                    name : period.name,
-                    serial: period.serial,
-                    foods: period.foods ? period.foods : []
-                })
-            })
-            return result
+
+            let cacheFoods = []
+            for(let i = 0; i < periods.length; i++){
+                let period = periods[i]
+                if(period.foods && period.foods.length > 0){                    
+                    for(let j=0; j<period.foods.length; j++){
+                        let cFood = cacheFoods.find(x => x._id == period.foods[j].idFood)
+                        if(cFood){
+                            period.foods[j].name = cFood.name
+                            period.foods[j].unit = cFood.unit
+                        }else{
+                            let food = await FoodModel.findOne(period.foods[j].idFood)
+                            if(food && !food.err){
+                                period.foods[j].name = food.name
+                                period.foods[j].unit = food.unit
+                                cacheFoods.push({
+                                    _id: food._id,
+                                    name: food.name,
+                                    unit: food.unit
+                                })
+                            }
+                        }   
+                    }
+                    
+                    
+                }            
+            }
+            
+            return convertJsonToPDF({cowBreedName: cowBreed.name, periods})
         } catch (error) {
             console.log("err cowBreed getFood",error)
             return {err: error}
