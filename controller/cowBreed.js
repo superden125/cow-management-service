@@ -214,11 +214,11 @@ const CowBreed = {
         
     },
 
-    getFood: async(id)=>{
+    getFood: async(id, isFile)=>{
         try {
             let cowBreed = await CowBreedModel.findOne(id)
             if(!cowBreed || cowBreed.err) return {err: "cow breed not found"}
-            let periods = await PeriodModel.queryByFields({idCowBreed: id}, ["_id", "foods", "name", "serial" ])
+            let periods = await PeriodModel.queryByFields({idCowBreed: id}, ["_id", "foods", "name", "serial", "startDay", "endDay" ])
             if(periods.length==0) return []            
 
             let cacheFoods = []
@@ -243,17 +243,18 @@ const CowBreed = {
                             }
                         }   
                     }
-                    
-                    
                 }            
             }
-            
-            return convertJsonToPDF({cowBreedName: cowBreed.name, periods})
+            return isFile ? convertJsonToPDF({cowBreedName: cowBreed.name, periods}) :
+            {cowBreedName: cowBreed.name, periods}
         } catch (error) {
             console.log("err cowBreed getFood",error)
             return {err: error}
-        }
-        
+        }        
+    },
+
+    createMeal(id){
+        return "coming soon"
     }
 }
 

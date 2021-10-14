@@ -27,12 +27,13 @@ router.route('/:id')
 
 router.route('/')
     .get(async (req,res)=>{        
-        let user = req.session.user
+        // let user = req.session.user
         let query = req.query
         query.filter = query.filter ? JSON.parse(query.filter): {}
-        if(user.role!='admin'){                 
-            query.filter.idArea = user.idArea
-        }            
+        //disable only role admin
+        // if(user.role!='admin'){                 
+        //     query.filter.idArea = user.idArea
+        // }            
         let foods = await FoodController.getMany(query)
         if(foods.err) return res.status.json({status: false, message: foods.err})
         res.json({status: true, data: foods})        

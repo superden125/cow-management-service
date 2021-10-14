@@ -27,7 +27,8 @@ router.route('/:id')
     })
 
 router.route('/')
-    .get(async (req,res)=>{        
+    .get(async (req,res)=>{ 
+        console.log("period")       
         let query = req.query        
         query.filter = query.filter ? JSON.parse(query.filter): {}  
         let periods = await PeriodController.getMany(query)
@@ -68,14 +69,15 @@ router.route('/:idPeriod/nutrition/:idNutrition')
         res.json({status: true})
     })
 
-router.route('/:idPeriod/food')
-    .post(async (req,res)=>{
-        let {idPeriod} = req.params
-        let data = req.body
+//disable foods
+// router.route('/:idPeriod/food')
+//     .post(async (req,res)=>{
+//         let {idPeriod} = req.params
+//         let data = req.body
 
-        let result = await PeriodController.pushFood(idPeriod, data)
-        if(!result || result.err) return res.status(400).json({status: false})
-        res.json({status: true})
-    })
+//         let result = await PeriodController.pushFood(idPeriod, data)
+//         if(!result || result.err) return res.status(400).json({status: false})
+//         res.json({status: true})
+//     })
 
  module.exports = router

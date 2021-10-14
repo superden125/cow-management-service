@@ -46,6 +46,7 @@ connectDB((err)=>{
     app.use('/api/food', require('./route/food'))
     app.use('/api/diaryfeed',require('./route/diaryFeed'))
     app.use('/api/period',require('./route/period'))
+    app.use('/api/meal',require('./route/meal'))
     
     app.listen(port, ()=>{
         console.log(`server listening on port ${port}...`)

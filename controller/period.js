@@ -80,15 +80,16 @@ const Period = {
     findById: async (id)=>{
         try {
             let period = await PeriodModel.findOne(id)
-            if(period.foods && period.foods.length > 0){
-                for(let i = 0; i < period.foods.length; i++){
-                    let food = await FoodModel.findOne(period.foods[i].idFood)
-                    if(food){
-                        period.foods[i].name = food.name
-                        period.foods[i].unit = food.unit
-                    }
-                }
-            }
+            //disable foods
+            // if(period.foods && period.foods.length > 0){
+            //     for(let i = 0; i < period.foods.length; i++){
+            //         let food = await FoodModel.findOne(period.foods[i].idFood)
+            //         if(food){
+            //             period.foods[i].name = food.name
+            //             period.foods[i].unit = food.unit
+            //         }
+            //     }
+            // }
             return period
         } catch (error) {
             return {err: error}
@@ -188,25 +189,28 @@ const Period = {
             }
 
             let items = await PeriodModel.getMany(limit, skip, sortOption, filter)
+            console.log("items", items)
 
-            if(items.length > 0){
-                for(let i = 1; i < items.length; i++){
-                    let period = items[i]
-                    if(period.foods.length > 0){
-                        for(let j = 0; j < period.foods.length; j++){
-                            let food = await FoodModel.findOne(period.foods[j].idFood)
-                            if(food){
-                                period.foods[j].name = food.name
-                                period.foods[j].unit = food.unit
-                            }
-                        }
-                    }
-                }                
-            }
+            //disable foods in period
+            // if(items.length > 0){
+            //     for(let i = 1; i < items.length; i++){
+            //         let period = items[i]
+            //         if(period.foods.length > 0){
+            //             for(let j = 0; j < period.foods.length; j++){
+            //                 let food = await FoodModel.findOne(period.foods[j].idFood)
+            //                 if(food){
+            //                     period.foods[j].name = food.name
+            //                     period.foods[j].unit = food.unit
+            //                 }
+            //             }
+            //         }
+            //     }                
+            // }
 
             let totalCount = await PeriodModel.count(filter)
             return {totalCount,items}
         } catch (error) {
+            console.log("error", error)
             return {err: error}
         }
     },
