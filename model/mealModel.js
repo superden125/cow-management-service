@@ -72,11 +72,143 @@ var MealModel = {
     },
 
     getMany: async (limit, skip, sort, filter)=>{
-        try {            
+        try {                        
             filter.deleted = false
             sort.createdAt = -1
-            let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()            
-            return doc
+            let pipeline = [
+                {
+                  '$match': filter
+                }, 
+                                
+                {
+                    '$lookup': {
+                    'from': 'period', 
+                    'localField': 'idPeriod', 
+                    'foreignField': '_id', 
+                    'as': 'period'
+                    }
+                }, {
+                    '$unwind': {
+                    'path': '$period'
+                    }
+                }, {
+                    '$addFields': {
+                    'periodName': '$period.name'
+                    }
+                }, {
+                    '$lookup': {
+                    'from': 'area', 
+                    'localField': 'idArea', 
+                    'foreignField': '_id', 
+                    'as': 'area'
+                    }
+                }, {
+                    '$unwind': {
+                    'path': '$area'
+                    }
+                }, {
+                    '$addFields': {
+                    'areaName': '$area.name'
+                    }
+                }, {
+                    '$project': {
+                    'period': 0, 
+                    'area': 0
+                    }
+                }, {
+                    '$unwind': {
+                    'path': '$foods'
+                    }
+                }, {
+                    '$lookup': {
+                    'from': 'food', 
+                    'localField': 'foods.idFood', 
+                    'foreignField': '_id', 
+                    'as': 'foods.food'
+                    }
+                }, {
+                    '$unwind': {
+                    'path': '$foods.food'
+                    }
+                }, {
+                    '$addFields': {
+                    'foods.name': '$foods.food.name', 
+                    'foods.unit': '$foods.food.unit'
+                    }
+                }, {
+                    '$project': {
+                    'foods.food': 0
+                    }
+                }, {
+                    '$group': {
+                    '_id': '$_id', 
+                    'foods': {
+                        '$push': '$foods'
+                    }
+                    }
+                }, {
+                    '$lookup': {
+                    'from': 'meal', 
+                    'localField': '_id', 
+                    'foreignField': '_id', 
+                    'as': 'meal'
+                    }
+                }, {
+                    '$unwind': {
+                    'path': '$meal'
+                    }
+                }, {
+                    '$addFields': {
+                    'meal.foods': '$foods'
+                    }
+                }, {
+                    '$replaceRoot': {
+                    'newRoot': '$meal'
+                    }
+                },
+                  
+                {
+                  '$lookup': {
+                    'from': 'period', 
+                    'localField': 'idPeriod', 
+                    'foreignField': '_id', 
+                    'as': 'period'
+                  }
+                }, {
+                  '$unwind': {
+                    'path': '$period'
+                  }
+                }, {
+                  '$addFields': {
+                    'periodName': '$period.name'
+                  }
+                }, {
+                  '$lookup': {
+                    'from': 'area', 
+                    'localField': 'idArea', 
+                    'foreignField': '_id', 
+                    'as': 'area'
+                  }
+                }, {
+                  '$unwind': {
+                    'path': '$area'
+                  }
+                }, {
+                  '$addFields': {
+                    'areaName': '$area.name'
+                  }
+                }, {
+                  '$project': {
+                    'period': 0, 
+                    'area': 0
+                  }
+                },
+                { '$limit': limit }, { '$skip': skip }, { '$sort': sort }
+              ]
+            
+            // let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()            
+            let docs = await _collection.aggregate(pipeline).toArray()
+            return docs
         } catch (error) {
             return {err: error}
         }
@@ -97,7 +229,96 @@ var MealModel = {
             let pipeline = [
                 {
                   '$match': filter
+                },                
+                
+                {
+                    '$lookup': {
+                    'from': 'period', 
+                    'localField': 'idPeriod', 
+                    'foreignField': '_id', 
+                    'as': 'period'
+                    }
                 }, {
+                    '$unwind': {
+                    'path': '$period'
+                    }
+                }, {
+                    '$addFields': {
+                    'periodName': '$period.name'
+                    }
+                }, {
+                    '$lookup': {
+                    'from': 'area', 
+                    'localField': 'idArea', 
+                    'foreignField': '_id', 
+                    'as': 'area'
+                    }
+                }, {
+                    '$unwind': {
+                    'path': '$area'
+                    }
+                }, {
+                    '$addFields': {
+                    'areaName': '$area.name'
+                    }
+                }, {
+                    '$project': {
+                    'period': 0, 
+                    'area': 0
+                    }
+                }, {
+                    '$unwind': {
+                    'path': '$foods'
+                    }
+                }, {
+                    '$lookup': {
+                    'from': 'food', 
+                    'localField': 'foods.idFood', 
+                    'foreignField': '_id', 
+                    'as': 'foods.food'
+                    }
+                }, {
+                    '$unwind': {
+                    'path': '$foods.food'
+                    }
+                }, {
+                    '$addFields': {
+                    'foods.name': '$foods.food.name', 
+                    'foods.unit': '$foods.food.unit'
+                    }
+                }, {
+                    '$project': {
+                    'foods.food': 0
+                    }
+                }, {
+                    '$group': {
+                    '_id': '$_id', 
+                    'foods': {
+                        '$push': '$foods'
+                    }
+                    }
+                }, {
+                    '$lookup': {
+                    'from': 'meal', 
+                    'localField': '_id', 
+                    'foreignField': '_id', 
+                    'as': 'meal'
+                    }
+                }, {
+                    '$unwind': {
+                    'path': '$meal'
+                    }
+                }, {
+                    '$addFields': {
+                    'meal.foods': '$foods'
+                    }
+                }, {
+                    '$replaceRoot': {
+                    'newRoot': '$meal'
+                    }
+                },                  
+                
+                {
                   '$lookup': {
                     'from': 'period', 
                     'localField': 'idPeriod', 

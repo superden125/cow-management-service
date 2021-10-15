@@ -35,9 +35,8 @@ router.route('/:id/file')
 router.route('/')
     .get(async (req,res)=>{
         let query = req.query        
-        query.filter = query.filter ? JSON.parse(query.filter): {}  
-        // let meals = await MealController.getMany(query)
-        let meals = await MealController.printMeal(query.filter)
+        query.filter = query.filter ? JSON.parse(query.filter): {}          
+        let meals = await MealController.getMany(query.filter)
         if(meals.err) return res.status(400).json({status: false, message: meals.err})
         res.json({status: true, data: meals})        
     })

@@ -43,7 +43,7 @@ const Meal = {
     },
     getMany: async (query)=>{
        try {
-            let {limit, skip, filter,sort} = query
+            let {limit, skip, filter,sort} = query            
             let sortOption = {}
             skip = skip ? parseInt(skip) : 0
 
