@@ -73,14 +73,111 @@ var DiaryFeedModel = {
 
     getMany: async (limit, skip, sort, filter)=>{
         try {            
-            filter.deleted = false        
-            let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()            
+            filter.deleted = false
+            sort.createdAt = -1
+            let pipeline = [
+                {
+                    '$match': filter
+                },
+                {
+                  '$unwind': {
+                    'path': '$foods'
+                  }
+                }, {
+                  '$lookup': {
+                    'from': 'food', 
+                    'localField': 'foods.idFood', 
+                    'foreignField': '_id', 
+                    'as': 'foods.food'
+                  }
+                }, {
+                  '$unwind': {
+                    'path': '$foods.food'
+                  }
+                }, {
+                  '$addFields': {
+                    'foods.name': '$foods.food.name', 
+                    'foods.unit': '$foods.food.unit'
+                  }
+                }, {
+                  '$project': {
+                    'foods.food': 0
+                  }
+                }, {
+                  '$group': {
+                    '_id': '$_id', 
+                    'foods': {
+                      '$push': '$foods'
+                    }
+                  }
+                }, {
+                  '$lookup': {
+                    'from': 'diaryFeed', 
+                    'localField': '_id', 
+                    'foreignField': '_id', 
+                    'as': 'diaryFeed'
+                  }
+                }, {
+                  '$unwind': {
+                    'path': '$diaryFeed'
+                  }
+                }, {
+                  '$addFields': {
+                    'diaryFeed.foods': '$foods'
+                  }
+                }, {
+                  '$replaceRoot': {
+                    'newRoot': '$diaryFeed'
+                  }
+                }, {
+                  '$lookup': {
+                    'from': 'cow', 
+                    'localField': 'idCow', 
+                    'foreignField': '_id', 
+                    'as': 'cow'
+                  }
+                }, {
+                  '$unwind': {
+                    'path': '$cow'
+                  }
+                }, {
+                  '$addFields': {
+                    'idUser': '$cow.idUser'
+                  }
+                }, {
+                  '$project': {
+                    'cow': 0
+                  }
+                }, {
+                  '$lookup': {
+                    'from': 'user', 
+                    'localField': 'idUser', 
+                    'foreignField': '_id', 
+                    'as': 'user'
+                  }
+                }, {
+                  '$unwind': {
+                    'path': '$user'
+                  }
+                }, {
+                  '$addFields': {
+                    'breerName': '$user.name'
+                  }
+                }, {
+                  '$project': {
+                    'user': 0
+                  }
+                },
+                { '$limit': limit}, { '$skip': skip}, { '$sort': sort }
+              ]
+            // let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()            
+            let doc = await _collection.aggregate(pipeline).toArray()
             return doc
         } catch (error) {
             console.log("eer",error)
             return {err: error}
         }
-    },
+    },    
 
     count: async (filter)=>{
         try{
