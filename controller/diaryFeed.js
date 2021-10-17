@@ -151,7 +151,7 @@ const DiaryFeed = {
                 sortOption[s]=v
             }
             delete filter.idUser
-            delete filter.idManager
+            delete filter.idManager            
             let items = await DiaryFeedModel.getMany(limit, skip, sortOption, filter)            
             if(items.length>0){
                 for(let i=0; i<items.length; i++){                    

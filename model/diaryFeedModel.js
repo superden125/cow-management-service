@@ -142,7 +142,7 @@ var DiaryFeedModel = {
                   }
                 }, {
                   '$addFields': {
-                    'idUser': '$cow.idUser'
+                    'idBreeder': '$cow.idUser'
                   }
                 }, {
                   '$project': {
@@ -151,7 +151,7 @@ var DiaryFeedModel = {
                 }, {
                   '$lookup': {
                     'from': 'user', 
-                    'localField': 'idUser', 
+                    'localField': 'idBreeder', 
                     'foreignField': '_id', 
                     'as': 'user'
                   }
@@ -161,27 +161,26 @@ var DiaryFeedModel = {
                   }
                 }, {
                   '$addFields': {
-                    'breerName': '$user.name'
+                    'breederName': '$user.name'
                   }
                 }, {
                   '$project': {
                     'user': 0
                   }
                 },
-                { '$limit': limit}, { '$skip': skip}, { '$sort': sort }
-              ]
+                // { '$limit': limit}, { '$skip': skip}, { '$sort': sort }
+              ]            
             // let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()            
             let doc = await _collection.aggregate(pipeline).toArray()
             return doc
-        } catch (error) {
-            console.log("eer",error)
+        } catch (error) {            
             return {err: error}
         }
     },    
 
     count: async (filter)=>{
         try{
-            filter.deleted = false
+            filter.deleted = false            
             let total = await _collection.count(filter)
             return total
         }catch(error){
