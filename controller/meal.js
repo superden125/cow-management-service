@@ -46,7 +46,7 @@ const Meal = {
             let {limit, skip, filter,sort} = query            
             let sortOption = {}
             skip = skip ? parseInt(skip) : 0
-
+            
             limit = limit ?  parseInt(limit) : 10        
             if(limit > 100) limit = 100
 
@@ -59,10 +59,21 @@ const Meal = {
                 sortOption[s]=v
             }
 
+            if(filter.idCowBreed){
+                //let cowBreed = await CowBreedModel.findOne(filter.idCowBreed)
+                // if(!cowBreed || cowBreed.err) return {err: "cow breed not found"}
+                let periods = await PeriodModel.queryByFields({idCowBreed : filter.idCowBreed})
+                if(periods.length == 0 || periods.err) return {err: "cow breed not found period"}            
+                let periodsId = periods.map(period => period._id)
+                filter.idPeriod = { $in : periodsId}
+            }            
+            delete filter.idCowBreed
+            
             let items = await MealModel.getMany(limit, skip, sortOption, filter)
-            let totalCount = await MealModel.count(filter)
+            let totalCount = await MealModel.count(filter)            
             return {totalCount,items}
        } catch (error) {
+           console.log("error", error)
            return {err: error}
        }
     },
@@ -90,21 +101,27 @@ const Meal = {
     },
 
     printMeal: async (data) =>{
-        let {idArea, idCowBreed, idPeriod} = data
-        console.log("data", data)
-        if(!idArea) return {err: "idArea null"}  
-        if(!idCowBreed && !idPeriod) return {err: "idCowBreed or idPeriod null"}        
-        let filter = { idArea }
-        if(idCowBreed){
-            let periods = await PeriodModel.queryByFields({idCowBreed})
-            if(periods.length == 0 || periods.err) return {err: "cow breed not found period"}            
-            let periodsId = periods.map(period => period._id)
-            filter.idPeriod = { $in : periodsId}
-        }else{
-            filter.idPeriod = idPeriod
+        try {
+            let {idArea, idCowBreed, idPeriod} = data
+            console.log("data", data)
+            if(!idArea) return {err: "idArea null"}  
+            if(!idCowBreed && !idPeriod) return {err: "idCowBreed or idPeriod null"}        
+            let filter = { idArea }
+            if(idCowBreed){
+                let periods = await PeriodModel.queryByFields({idCowBreed})
+                if(periods.length == 0 || periods.err) return {err: "cow breed not found period"}            
+                let periodsId = periods.map(period => period._id)
+                filter.idPeriod = { $in : periodsId}
+            }else{
+                filter.idPeriod = idPeriod
+            }
+            console.log("filter", filter)
+            let meal = await MealModel.getLaterMeal(filter)
+            return meal
+        } catch (error) {
+            console.log("error", error)
+            return {err: error}
         }
-        let meal = await MealModel.getDetailMeal(filter)
-        return meal
     },
 
     cerateMeal: async (data) =>{

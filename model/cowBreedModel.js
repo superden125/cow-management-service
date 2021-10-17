@@ -2,7 +2,7 @@
 const DB = require('./index')
 const ObjectId = require('mongodb').ObjectId
 
-const collectionName = 'crowBreed'
+const collectionName = 'cowBreed'
 
 let _db = DB.getDb()
 let _collection = _db.collection(collectionName)

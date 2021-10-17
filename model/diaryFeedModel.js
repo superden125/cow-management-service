@@ -168,7 +168,7 @@ var DiaryFeedModel = {
                     'user': 0
                   }
                 },
-                // { '$limit': limit}, { '$skip': skip}, { '$sort': sort }
+                { '$limit': limit}, { '$skip': skip}, { '$sort': sort }
               ]            
             // let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()            
             let doc = await _collection.aggregate(pipeline).toArray()
