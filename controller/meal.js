@@ -4,7 +4,8 @@ const AreaModel = require('../model/areaModel')
 const CowBreedModel = require('../model/cowBreedModel')
 const PeriodModel = require('../model/periodModel')
 const FoodModel = require('../model/foodModel')
-const {convertJsonToPDF} = require('../lib/utils')
+const {convertJsonToPDF, convertArrayToObject} = require('../lib/utils')
+const { mixFood } = require('../lib/nutrition')
 const Meal = {
     insertOne: async (data)=>{
         try {
@@ -172,17 +173,29 @@ const Meal = {
         }
     },
 
-    cerateMeal: async (data) =>{
+    cerateMeal: async (data) =>{        
         let {idArea, idCowBreed, idPeriod} = data
         if(!idArea) return {err: "idArea null"}  
         //only cow breed
-        if(!idCowBreed) return {err: "idCowBreed null"}
+        // if(!idCowBreed) return {err: "idCowBreed null"}
         // if(!idCowBreed && !idPeriod) return {err: "idCowBreed or idPeriod null"}
         let area = await AreaModel.findOne(idArea)
         if(!area) return {err: "area not found"}
-        let foods = await FoodModel.queryByFields({idArea})
-        if(foods.length == 0) return {err: "area not have foods"}
+        // let foods = await FoodModel.queryByFields({idArea})
+        // if(foods.length == 0) return {err: "area not have foods"}
         
+        let listFoods = []
+        let i = 0
+        while(i<data.foods.length){
+            if(!data.foods[i].idFood) return {err: `idFood null at ${i}`}
+            let food = await FoodModel.findOne(data.foods[i].idFood)
+            if(!food) return {err: `food not found at ${i}`}
+            if(food.idArea === idArea){
+                listFoods.push(food)
+            }            
+            i++
+        }
+
         if(idCowBreed){
             let cowBreed = await CowBreedModel.findOne(idCowBreed)
             let periods = await PeriodModel.queryByFields({idCowBreed})
@@ -191,7 +204,8 @@ const Meal = {
             for(let i = 0; i < periods.length; i++){
                 let period = periods[i]
                 if(period.nutrition){
-                    let meal = calculateMeal(foods,period.nutrition)
+                    // let meal = calculateMeal(foods,period.nutrition)
+                    let meal = mixFood( listFoods, convertArrayToObject(period.nutrition))
                     let doc = {
                         idArea: idArea,
                         idPeriod: period._id,
@@ -215,17 +229,15 @@ const Meal = {
         }else{
             let period = await PeriodModel.findOne(idPeriod)
             if(!period || period.err) return {err: "period not found"}            
-            if(!period.nutrition) return {err: "period not have nutrition"}
-
+            if(!period.nutrition) return {err: "period not have nutrition"}            
             //function calculateMeal(foods,period.nutrition)
-            let meal = calculateMeal(foods,period.nutrition)
-
+            let meal = mixFood(listFoods,convertArrayToObject(period.nutrition))
             let doc = {
                 idArea: idArea,
                 idPeriod: idPeriod,
                 foods: meal
             }
-            await MealModel.insertOne(doc)
+            // await MealModel.insertOne(doc)
             return meal
         }
     },
