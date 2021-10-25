@@ -189,7 +189,7 @@ const Period = {
             }
 
             let items = await PeriodModel.getMany(limit, skip, sortOption, filter)
-            console.log("items", items)
+            // console.log("items", items)
 
             //disable foods in period
             // if(items.length > 0){

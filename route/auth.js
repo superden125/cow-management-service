@@ -6,8 +6,7 @@ const {isLogin} = require('../middleware/auth')
 const router = express.Router()
 router.route('/login')
     .post(async (req,res)=>{
-        let {username, password} = req.body
-        console.log("user", username, password)
+        let {username, password} = req.body        
         if(!username || !password) return res.json({status: false, message: "username or password null"})
         let result = await UserController.login({username,password})            
         if(result.err) return res.status(400).json({status: false, message: result.err})

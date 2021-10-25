@@ -9,7 +9,7 @@ module.exports = {
 
             let decode = await jwt.decode(token)            
             if(!decode) return res.status(401).json({err: "invalid session"})
-            req.session.user = decode
+            req.session.user = decode            
             next()
         }catch(err){
             res.status(401).json({err: 'invalid session'})

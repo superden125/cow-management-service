@@ -61,10 +61,10 @@ var MealModel = {
         }
     },
 
-    queryByFields: async (filter)=>{
+    queryByFields: async (filter, sort = { createdAt : -1})=>{
         try {            
             filter.deleted = false        
-            let doc = await _collection.find(filter).toArray()            
+            let doc = await _collection.find(filter).sort(sort).toArray()            
             return doc
         } catch (error) {
             return {err: error}

@@ -8,10 +8,12 @@ const Food = {
             //check data
             if(!data.name) return {err: "name null"}
             if(!data.unit) return {err: "unit null"}
+            if(!data.type) return {err: "type null"}
 
             if(!data.idArea) return {err: "idArea null"}
             let area = await AreaModel.findOne(data.idArea)
-            if(!area) return {err: "idArea not found"}
+            if(!area) return {err: "idArea not found"}            
+            if([0, 1].indexOf(parseInt(data.type)) == -1) return {err: "type invalid"}    
 
             if(data.ingredient && data.ingredient.length > 0){
                 data.ingredient.map(item => item.idIngredient = shortid.generate())

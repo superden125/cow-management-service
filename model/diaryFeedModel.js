@@ -71,7 +71,7 @@ var DiaryFeedModel = {
         }
     },
 
-    getMany: async (limit, skip, sort, filter)=>{
+    getMany: async (limit, skip, sort, filter, group = false)=>{
         try {            
             filter.deleted = false
             sort.createdAt = -1
@@ -142,7 +142,8 @@ var DiaryFeedModel = {
                   }
                 }, {
                   '$addFields': {
-                    'idBreeder': '$cow.idUser'
+                    'idBreeder': '$cow.idUser',
+                    'serial':'$cow.serial'
                   }
                 }, {
                   '$project': {
@@ -167,9 +168,41 @@ var DiaryFeedModel = {
                   '$project': {
                     'user': 0
                   }
-                },
-                { '$sort': sort },{ '$skip': skip}, { '$limit': limit}
-              ]            
+                }
+                // ,
+                // {
+                //   '$group': {
+                //     '_id': '$idBreeder', 
+                //     'diaryFeeds': {
+                //       '$push': {
+                //         'idDairyFeed': '$_id', 
+                //         'idCow': '$idCow', 
+                //         'createdAt': '$createdAt', 
+                //         'serial': '$serial', 
+                //         'foods': '$foods'
+                //       }
+                //     }
+                //   }
+                // },
+                // { '$sort': sort }, { '$skip': skip}, { '$limit': limit}
+              ]        
+            if(group){
+              pipeline.push({
+                '$group': {
+                  '_id': '$idBreeder', 
+                  'diaryFeeds': {
+                    '$push': {
+                      'idDairyFeed': '$_id', 
+                      'idCow': '$idCow', 
+                      'createdAt': '$createdAt', 
+                      'serial': '$serial', 
+                      'foods': '$foods'
+                    }
+                  }
+                }
+              })
+            }
+            pipeline.push({ '$sort': sort }, { '$skip': skip}, { '$limit': limit})
             // let doc = await _collection.find(filter).limit(limit).skip(skip).sort(sort).toArray()            
             let doc = await _collection.aggregate(pipeline).toArray()
             return doc
