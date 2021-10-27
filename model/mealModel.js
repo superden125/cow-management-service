@@ -467,7 +467,7 @@ var MealModel = {
                   }
               }, {
                   '$addFields': {
-                  'periodName': '$period.name'
+                  'periodName': '$period.name'                  
                   }
               }, {
                   '$lookup': {
@@ -557,7 +557,9 @@ var MealModel = {
                   'periodName': '$period.name',                    
                   'idCowBreed': '$period.idCowBreed',
                   'startDay': '$period.startDay',
-                  'endDay': '$period.endDay'
+                  'endDay': '$period.endDay',
+                  'nutrition': '$period.nutrition',
+                  'weight': '$period.weight'
                 }
               }, {
                 '$lookup': {

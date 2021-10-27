@@ -150,7 +150,7 @@ const Meal = {
             }else{
                 filter.idPeriod = idPeriod
             }            
-            let meal = await MealModel.getLaterMeal(filter)
+            let meal = await MealModel.getLaterMeal(filter)            
             if(meal.length == 0) return {err: "meal not found"}
             let docs = {
                 cowBreedName: meal[0].cowBreedName,
@@ -215,7 +215,9 @@ const Meal = {
                     doc.periodName = period.name
                     doc.startDay = period.startDay
                     doc.endDay = period.endDay
-                    doc.createdAt = Date.now()            
+                    doc.createdAt = Date.now()
+                    doc.nutrition = period.nutrition           
+                    doc.weight = period.weight                    
                     meals.push(doc)
                 }                
             }
