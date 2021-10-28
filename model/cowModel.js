@@ -81,6 +81,26 @@ var CowModel = {
         }
     },
 
+    deleteMany: async (filter)=>{
+        try {            
+            filter.deleted = false        
+            let docs = await _collection.updateMany(filter, {$set : {deleted: true}}, {returnOriginal: false})            
+            return docs
+        } catch (error) {
+            return {err: error}
+        }
+    },
+
+    updateMany: async (filter, data)=>{
+        try {            
+            filter.deleted = false        
+            let docs = await _collection.updateMany(filter, {$set : data}, {returnOriginal: false})
+            return docs
+        } catch (error) {
+            return {err: error}
+        }
+    },
+
     count: async (filter)=>{
         try{
             filter.deleted = false

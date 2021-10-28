@@ -1,6 +1,6 @@
 "use strict";
 const GroupCowModel = require('../model/groupCowModel')
-
+const CowModel = require('../model/cowModel')
 const GroupCow = {
     insertOne: async (data)=>{
         try {
@@ -23,8 +23,18 @@ const GroupCow = {
             return {err: error}
         }
     },
-    deleteById: (id)=>{
-        return GroupCowModel.deleteOne(id)
+    deleteById: async (id, deleteCow)=>{    
+        try {
+            if(deleteCow){            
+                await CowModel.deleteMany({idGroupCow: id})
+            }else{
+                await CowModel.updateMany({idGroupCow: id}, {idGroupCow: ""})
+            }
+            let result = await GroupCowModel.deleteOne(id)    
+            return result
+        } catch (error) {
+            return {err: error}
+        }        
     },
     updateOne: async (id,data)=>{
         try {

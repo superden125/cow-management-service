@@ -19,7 +19,8 @@ router.route('/:id')
     })
     .delete(async (req,res)=>{
         let id = req.params.id
-        let groupCow = await GroupCowController.deleteById(id)
+        let { deleteCow } = req.body
+        let groupCow = await GroupCowController.deleteById(id, deleteCow)
         if(!groupCow) return res.status(400).json({status: false, message: "groupCow not found"})
         res.json({status: true})
     })

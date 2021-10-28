@@ -87,13 +87,13 @@ const Cow = {
             }
 
             if(data.idCowBreed){
-                let cowBreed = await CowBreed.findOne(data.idCowBreed)
-                if(!cowBreed) return {err: "cow breed not found"}
+                let cowBreed = await CowBreedModel.queryByFields({_id:data.idCowBreed})
+                if(cowBreed.length == 0 || cowBreed.err) return {err: "cow breed not found"}
             }
             
             if(data.idGroupCow){
-                let groupCow = await GroupCowModel.findOne(data.idGroupCow)
-                if(!groupCow) return {err: "group cow not found"}
+                let groupCow = await GroupCowModel.queryByFields({_id:data.idGroupCow})
+                if(groupCow.length == 0 || groupCow.err) return {err: "group cow not found"}
             }
             if(data.birthday){                
                 if((new Date(data.birthday))=='Invalid Date')
