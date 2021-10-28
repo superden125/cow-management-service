@@ -204,7 +204,7 @@ const Meal = {
             for(let i = 0; i < periods.length; i++){
                 let period = periods[i]
                 if(period.nutrition){
-                    // let meal = calculateMeal(foods,period.nutrition)
+                    // let meal = calculateMeal(foods,period.nutrition)                    
                     let meal = mixFood( listFoods, convertArrayToObject(period.nutrition))
                     let doc = {
                         idArea: idArea,
