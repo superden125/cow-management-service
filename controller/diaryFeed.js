@@ -12,7 +12,7 @@ const { convertArrayToObject } = require('../lib/utils')
 
 const DiaryFeed = {
     insertOne: async (data)=>{
-        try {        
+        try {
             data.isCorrect = true
             let listFoods = []
             //check cow
@@ -133,7 +133,7 @@ const DiaryFeed = {
                 to = new Date(`${to} 23:59`).getTime()            
                 Object.assign(filter, {createdAt: { $gt : from , $lt : to }})         
             }
-            console.log("filter", filter)
+            
             if(filter.idManager){
                 // let cows = await CowModel.getMany(999,0,{},{idUser:filter.idUser})
                 let filterUser = {idManager: filter.idManager}
@@ -141,7 +141,7 @@ const DiaryFeed = {
                     let re = new RegExp(search,'i')
                     Object.assign(filterUser,{$or: [{ username: { $regex: re } },  { name: { $regex: re }}, { email: { $regex: re }} ] })
                 }
-                console.log("filterUser", filterUser)
+                
                 let users = await UserModel.queryByFields(filterUser)
                 console.log("users", users)
                 if(users.length > 0){
