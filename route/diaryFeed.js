@@ -33,11 +33,21 @@ router.route('/')
         if(diaryFeeds.err) return res.status.json({status: false, message: diaryFeeds.err})
         res.json({status: true, data: diaryFeeds})     
     })
-    .post(async (req,res)=>{
+    .post(async (req,res)=>{        
         let data = req.body
         let user = req.session.user
         data.idArea = user.idArea
         let result = await DiaryFeedController.insertOne(data)        
+        if(result.err) return res.status(400).json({status: false, message: result.err}) 
+        return res.json({status: true, data: result})
+    })
+
+router.route('/groupCow')
+    .post(async (req,res)=>{        
+        let data = req.body
+        let user = req.session.user
+        data.idArea = user.idArea        
+        let result = await DiaryFeedController.insertMany(data)        
         if(result.err) return res.status(400).json({status: false, message: result.err}) 
         return res.json({status: true, data: result})
     })

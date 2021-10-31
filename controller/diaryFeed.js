@@ -4,11 +4,12 @@ const CowModel = require('../model/cowModel')
 const FoodModel = require('../model/foodModel')
 const UserModel = require('../model/userModel')
 const MealModel = require('../model/mealModel')
-const CowController = require('./cow')
+const CowController = require('./cow');
 const PeriodModel = require('../model/periodModel');
+const GroupCowModel = require('../model/groupCowModel');
 
 const { compareNutrition, calcNutrition } = require('../lib/nutrition');
-const { convertArrayToObject } = require('../lib/utils')
+const { convertArrayToObject } = require('../lib/utils');
 
 const DiaryFeed = {
     insertOne: async (data)=>{
@@ -72,6 +73,75 @@ const DiaryFeed = {
             return {err: error}
         }
     },
+
+    insertMany: async (data)=>{
+        try {
+
+            if(!data.idGroupCow) return {err: "group cow invalid"}
+            let groupCow = await GroupCowModel.findOne(data.idGroupCow)
+            if(!groupCow || groupCow.err) return {err: "group cow not found"}
+            let cows = await CowModel.queryByFields({idGroupCow: data.idGroupCow})
+            if(cows.length == 0 || cows.err) return {err: "group empty cow"}
+
+            //check foods            
+            if(!data.foods || Array.isArray(data.foods)==false)
+            return {err: "list foods invalid"} 
+            let listFoods = []
+            let i = 0
+            while(i<data.foods.length){
+
+                if(!data.foods[i].idFood) return {err: `idFood null at ${i}`}            
+                if(!data.foods[i].amount) return {err: `amount null at ${i}`}
+
+                data.foods[i].amount = parseFloat(data.foods[i].amount) 
+                // console.log("data", data.foods[i])               
+                if(Number.isNaN(data.foods[i].amount)==true || data.foods[i].amount <= 0)
+                    return {err: `amount must > 0 at ${i}`}
+
+                let food = await FoodModel.findOne(data.foods[i].idFood)
+                if(!food) return {err: `food not found at ${i}`}
+                food.amount = data.foods[i].amount
+                listFoods.push(food)
+                i++
+            }
+            
+            let countSuccess = 0
+            for(let i = 0; i < cows.length; i++){
+                let meal = {
+                    idCow: cows[i]._id,
+                    foods: data.foods,                    
+                    isCorrect: true
+                }
+                
+                let cow = await CowController.findById(cows[i]._id)
+                if(!cow) return {err: "cow not found"}
+                console.log("cow", cow)
+                //new check correct diary feed
+                let period = await PeriodModel.findOne(cow.currentPeriodId)
+                console.log("period", period)
+                let periodNutrition = convertArrayToObject(period.nutrition)
+                console.log("period nutrition", periodNutrition)
+                let foodNutrition = calcNutrition(listFoods)
+                console.log("food nutri", foodNutrition)
+                console.log("period nutri", periodNutrition)
+                let result = compareNutrition(foodNutrition, periodNutrition)
+                meal.isCorrect = result
+                // delete meal.idArea
+                //insert db
+                let diaryFeed = await DiaryFeedModel.insertOne(meal)
+                if(diaryFeed.insertedId){
+                    countSuccess++
+                }else{
+                    return {err: diaryFeed}
+                }
+            }
+            return {totalSuccess: countSuccess}
+        } catch (error) {
+            console.log("error", error)
+            return {err: error}
+        }
+    },
+
     findById: async (id)=>{
         try {
             let diaryFeed = await DiaryFeedModel.findOne(id)            
@@ -178,8 +248,20 @@ const DiaryFeed = {
                     Object.assign(filter, {idCow: { $in: cowsId }})
                 }else{
                     return []
+                }                
+            }
+
+            if(filter.idGroupCow){                
+                let cows = await CowModel.queryByFields({idGroupCow: filter.idGroupCow})
+                if(cows.length>0){
+                    let cowsId = []
+                    cows.forEach((cow)=>{
+                        cowsId.push(cow._id)
+                    })
+                    Object.assign(filter, {idCow: { $in: cowsId }})
+                }else{
+                    return []
                 }
-                
             }
             
             if(sort){
@@ -190,6 +272,7 @@ const DiaryFeed = {
             }
             delete filter.idUser
             delete filter.idManager
+            delete filter.idGroupCow
             let items = []
             console.log("group", group)
             if(group == "breeder"){
