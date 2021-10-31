@@ -120,7 +120,7 @@ const DiaryFeed = {
     },
     getMany: async (query)=>{
         try {
-            let {limit, skip, filter, sort, from, to, group} = query
+            let {limit, skip, filter, sort, from, to, group, search} = query
             let sortOption = {}
             skip = skip ? parseInt(skip) : 0
 
@@ -133,23 +133,37 @@ const DiaryFeed = {
                 to = new Date(`${to} 23:59`).getTime()            
                 Object.assign(filter, {createdAt: { $gt : from , $lt : to }})         
             }
-
+            console.log("filter", filter)
             if(filter.idManager){
                 // let cows = await CowModel.getMany(999,0,{},{idUser:filter.idUser})
-                let users = await UserModel.getMany({idManager: filter.idManager})
+                let filterUser = {idManager: filter.idManager}
+                if(search){
+                    let re = new RegExp(search,'i')
+                    Object.assign(filterUser,{$or: [{ username: { $regex: re } },  { name: { $regex: re }}, { email: { $regex: re }} ] })
+                }
+                console.log("filterUser", filterUser)
+                let users = await UserModel.queryByFields(filterUser)
+                console.log("users", users)
                 if(users.length > 0){
-                    for(let i=0; i<users.length; i++){
-                        let cows = await CowModel.queryByFields({idUser:users[i]})
-                        if(cows.length>0){
-                            let cowsId = []
-                            cows.forEach((cow)=>{
-                                cowsId.push(cow._id)
-                            })
-                            Object.assign(filter, {idCow: { $in: cowsId }})
-                        }else{
-                            return []
-                        }
-                    }                    
+                    let userIds = users.map(user => user._id)                    
+                    let cows = await CowModel.queryByFields({idUser : { $in : userIds}})                    
+                    let cowIds = cows.map(cow => cow._id)                    
+                    Object.assign(filter, {idCow: { $in: cowIds }})
+                    // for(let i=0; i<users.length; i++){
+                    //     let cows = await CowModel.queryByFields({idUser:users[i]._id})
+                    //     console.log("cows", cows)
+                    //     if(cows.length>0){
+                    //         let cowsId = []
+                    //         cows.forEach((cow)=>{
+                    //             cowsId.push(cow._id)
+                    //         })
+                    //         Object.assign(filter, {idCow: { $in: cowsId }})
+                    //     }else{
+                    //         return []
+                    //     }
+                    // }                    
+                }else{
+                    return []
                 }                
             }
             

@@ -80,6 +80,10 @@ const Period = {
     findById: async (id)=>{
         try {
             let period = await PeriodModel.findOne(id)
+            if(period){
+                let cowBreed = await CowBreedModel.findOne(period.idCowBreed)
+                period.cowBreedName = cowBreed.name
+            }
             //disable foods
             // if(period.foods && period.foods.length > 0){
             //     for(let i = 0; i < period.foods.length; i++){
