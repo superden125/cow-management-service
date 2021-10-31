@@ -168,7 +168,8 @@ const Meal = {
         try {            
             let result = await convertJsonToPDF(data, false)
             return result
-        } catch (error) {            
+        } catch (error) {      
+            console.log("error", error)      
             return {err: error}
         }
     },
@@ -231,16 +232,29 @@ const Meal = {
         }else{
             let period = await PeriodModel.findOne(idPeriod)
             if(!period || period.err) return {err: "period not found"}            
-            if(!period.nutrition) return {err: "period not have nutrition"}            
+            if(!period.nutrition) return {err: "period not have nutrition"}
+            let cowBreed = await CowBreedModel.findOne(period.idCowBreed)        
             //function calculateMeal(foods,period.nutrition)
             let meal = mixFood(listFoods,convertArrayToObject(period.nutrition))
             let doc = {
                 idArea: idArea,
-                idPeriod: idPeriod,
+                idPeriod: period._id,
                 foods: meal
             }
+            doc.periodName = period.name
+            doc.startDay = period.startDay
+            doc.endDay = period.endDay
+            doc.createdAt = Date.now()
+            doc.nutrition = period.nutrition           
+            doc.weight = period.weight
             // await MealModel.insertOne(doc)
-            return meal
+            return { 
+                idCowBreed, 
+                idArea,
+                cowBreedName: cowBreed.name,
+                areaName: area.name,
+                items: [doc]
+            }
         }
     },
 
