@@ -253,7 +253,7 @@ var DiaryFeedModel = {
 
     statistic : async (idCow, filter)=>{
         try {
-            console.log("filter", filter)  
+            // console.log("filter", filter)  
             let pipeline = [
                 {   
                   '$match': filter
@@ -289,15 +289,39 @@ var DiaryFeedModel = {
                 }
                 , {
                     '$unset': ['amount']
-                }
-                
+                },
+                {
+                  '$lookup':{
+                    'from': 'food',
+                    'localField': '_id',
+                    'foreignField': '_id',
+                    'as': 'food'
+                  }
+                },
+                {
+                  '$unwind': {
+                    'path': '$food'
+                  }
+                },
+                {
+                  '$addFields':{
+                    'name': '$food.name',
+                    'unit': '$food.unit'
+                  }
+                },
+                {
+                  '$project': {
+                    'food': 0
+                  }
+                }                
               ] 
               
             let data = await _collection.aggregate(pipeline).toArray()
-            console.log("data", data)
+            // console.log("data", data)
             return data
         } catch (error) {
-            
+          console.log("error statistic diary feed", error)
+          return []
         }
     }
 }
