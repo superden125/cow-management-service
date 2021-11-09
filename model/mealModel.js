@@ -183,7 +183,7 @@ var MealModel = {
                 }, {
                   '$addFields': {
                     'periodName': '$period.name',
-                    //'idCowBreed': '$period.idCowBreed'
+                    'idCowBreed': '$period.idCowBreed'
                   }
                 }, {
                   '$lookup': {
@@ -201,27 +201,27 @@ var MealModel = {
                     'areaName': '$area.name'
                   }
                 }, 
-                // {
-                //     '$lookup': {
-                //       'from': 'cowBreed', 
-                //       'localField': 'idCowBreed', 
-                //       'foreignField': '_id', 
-                //       'as': 'cowBreed'
-                //     }
-                //   }, {
-                //     '$unwind': {
-                //       'path': '$cowBreed'
-                //     }
-                //   }, {
-                //     '$addFields': {
-                //       'cowBreedName': '$cowBreed.name'
-                //     }
-                // },
+                {
+                    '$lookup': {
+                      'from': 'cowBreed', 
+                      'localField': 'idCowBreed', 
+                      'foreignField': '_id', 
+                      'as': 'cowBreed'
+                    }
+                  }, {
+                    '$unwind': {
+                      'path': '$cowBreed'
+                    }
+                  }, {
+                    '$addFields': {
+                      'cowBreedName': '$cowBreed.name'
+                    }
+                },
                 {
                   '$project': {
                     'period': 0, 
                     'area': 0,
-                    //'cowBreed': 0
+                    'cowBreed': 0
                   }
                 },
                 { '$sort': sort },{ '$skip': skip}, { '$limit': limit}
