@@ -54,12 +54,17 @@ const DiaryFeed = {
             
             //new check correct diary feed
             let period = await PeriodModel.findOne(cow.currentPeriodId)
-            let periodNutrition = convertArrayToObject(period.nutrition)
-            let foodNutrition = calcNutrition(listFoods)
-            console.log("food nutri", foodNutrition)
-            console.log("period nutri", periodNutrition)
-            let result = compareNutrition(foodNutrition, periodNutrition)
-            data.isCorrect = result
+            if(period){
+                let periodNutrition = convertArrayToObject(period.nutrition)
+                let foodNutrition = calcNutrition(listFoods)
+                console.log("food nutri", foodNutrition)
+                console.log("period nutri", periodNutrition)
+                let result = compareNutrition(foodNutrition, periodNutrition)
+                data.isCorrect = result
+            }else{
+                data.idCorrect = false
+            }
+            
             delete data.idArea
             //insert db
             let diaryFeed = await DiaryFeedModel.insertOne(data)
@@ -119,13 +124,18 @@ const DiaryFeed = {
                 //new check correct diary feed
                 let period = await PeriodModel.findOne(cow.currentPeriodId)
                 console.log("period", period)
-                let periodNutrition = convertArrayToObject(period.nutrition)
-                console.log("period nutrition", periodNutrition)
-                let foodNutrition = calcNutrition(listFoods)
-                console.log("food nutri", foodNutrition)
-                console.log("period nutri", periodNutrition)
-                let result = compareNutrition(foodNutrition, periodNutrition)
-                meal.isCorrect = result
+                if(period){
+                    let periodNutrition = convertArrayToObject(period.nutrition)
+                    console.log("period nutrition", periodNutrition)
+                    let foodNutrition = calcNutrition(listFoods)
+                    console.log("food nutri", foodNutrition)
+                    console.log("period nutri", periodNutrition)
+                    let result = compareNutrition(foodNutrition, periodNutrition)
+                    meal.isCorrect = result
+                }else{
+                    meal.isCorrect = false
+                }
+                
                 // delete meal.idArea
                 //insert db
                 let diaryFeed = await DiaryFeedModel.insertOne(meal)
