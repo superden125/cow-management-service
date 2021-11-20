@@ -11,13 +11,13 @@ const CowBreed = {
     insertOne: async (data)=>{
         try {
             // //check null
-            // if(!data.name) return {err: "name null"}
-            // if(!data.farmingTime) return {err: "farmingTime null"}
+            if(!data.name) return {err: "name null"}
+            if(!data.farmingTime) return {err: "farmingTime null"}
 
             // //check farmingTime
-            // data.farmingTime = parseInt(data.farmingTime)
-            // if(Number.isInteger(data.farmingTime) == false)
-            //     return {err: "farming time invalid"}
+            data.farmingTime = parseInt(data.farmingTime)
+            if(Number.isInteger(data.farmingTime) == false)
+                return {err: "farming time invalid"}
 
             //insert db
             let cowBreed = await CowBreedModel.insertOne(data)

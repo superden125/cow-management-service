@@ -15,15 +15,15 @@ const Period = {
 
             //check serial, startDay, weight,name
             if(!data.name) return {err: "name null"}
-            if(!data.serial) return {err: "serial null"}
+            // if(!data.serial) return {err: "serial null"}
             if(!data.startDay) return {err: "startDay null"}
             if(!data.endDay) return {err: "endDay null"}
             if(!data.weight) return {err: "weight null"}
 
             //serial > 0
-            data.serial = parseInt(data.serial)
-            if(Number.isInteger(data.serial)==false|| data.serial <= 0)
-                return {err: "serial must > 0"}
+            // data.serial = parseInt(data.serial)
+            // if(Number.isInteger(data.serial)==false|| data.serial <= 0)
+            //     return {err: "serial must > 0"}
             
             //weight > 0
             data.weight = parseFloat(data.weight)
