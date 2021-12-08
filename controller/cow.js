@@ -50,14 +50,14 @@ const Cow = {
         try {
             let cow = await CowModel.findOne(id)
             if(cow){
-                //get cow breed            
-                let cowBreed = await CowBreedModel.findOne(cow.idCowBreed)
-                cow.cowBreedName = cowBreed.name
+                //get cow breed                      
+                let cowBreed = await CowBreedModel.findOne(cow.idCowBreed)                
+                cow.cowBreedName = cowBreed ? cowBreed.name : "null"
 
                 //get group cow
                 if(cow.idGroupCow){
                     let groupCow = await GroupCowModel.findOne(cow.idGroupCow)
-                    cow.groupCowName = groupCow.name
+                    cow.groupCowName = groupCow ? groupCow.name : ""
                 }
 
                 //get current period
@@ -141,7 +141,7 @@ const Cow = {
                             cow.cowBreedName = cacheCowBreed.name
                         }else{
                             let cowBreed = await CowBreedModel.findOne(cow.idCowBreed)
-                            cow.cowBreedName = cowBreed.name
+                            cow.cowBreedName = cowBreed.name ? cowBreed.name : "null"   
                             cacheCowBreedList.push({id: cowBreed._id, name: cowBreed.name})
                         }                        
 
@@ -151,9 +151,12 @@ const Cow = {
                             if(cacheGroupCow){
                                 cow.groupCowName = cacheGroupCow.name
                             }else{
-                                let groupCow = await GroupCowModel.findOne(cow.idGroupCow)
-                                cow.groupCowName = groupCow.name
-                                cacheGroupCowList.push({id: groupCow._id, name: groupCow.name})
+                                let groupCow = await GroupCowModel.findOne(cow.idGroupCow)                                
+                                if(groupCow){
+                                    cow.groupCowName = groupCow.name ? groupCow.name : ""
+                                    cacheGroupCowList.push({id: groupCow._id, name: groupCow.name})
+                                }
+                                
                             }
                             
                         }
