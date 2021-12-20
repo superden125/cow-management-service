@@ -135,7 +135,8 @@ var MealModel = {
                 }, {
                     '$addFields': {
                     'foods.name': '$foods.food.name', 
-                    'foods.unit': '$foods.food.unit'
+                    'foods.unit': '$foods.food.unit',
+                    'foods.type': '$foods.food.type',
                     }
                 }, {
                     '$project': {
@@ -507,7 +508,8 @@ var MealModel = {
               }, {
                   '$addFields': {
                   'foods.name': '$foods.food.name', 
-                  'foods.unit': '$foods.food.unit'
+                  'foods.unit': '$foods.food.unit',
+                  'foods.type': '$foods.food.type',
                   }
               }, {
                   '$project': {
