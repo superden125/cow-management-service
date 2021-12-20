@@ -102,14 +102,15 @@ const Meal = {
                 filter.idPeriod = { $in : periodsId}
             }            
             delete filter.idCowBreed
-            
-            //update ratio meal
+
             let items = await MealModel.getMany(limit, skip, sortOption, filter)            
+
+            //update ratio meal
             if(items.length > 0){
                 items.map((meal) =>{
                     let total = 0
                     meal.foods.map(food => total += food.amount)
-                    if(total > 0) meal.foods.map(food => food.ratio = (food.amount/total).toFixed(2))                    
+                    if(total > 0) meal.foods.map(food => food.ratio = parseFloat((food.amount/total).toFixed(2)))
                 })
             }            
             let totalCount = await MealModel.count(filter)            
